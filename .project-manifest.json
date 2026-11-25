@@ -1,0 +1,329 @@
+{
+  "project_shape": "fullstack",
+  "modules": [
+    {
+      "id": "product-document",
+      "path": "product/document.mjs",
+      "role": [
+        "逐像素合成",
+        "局部轮廓变换",
+        "几何遮罩链",
+        "透明度与混色",
+        "边缘子像素",
+        "导入文档"
+      ]
+    },
+    {
+      "id": "product-raster",
+      "path": "product/raster.mjs",
+      "role": [
+        "逐像素合成",
+        "局部轮廓变换",
+        "几何遮罩链",
+        "透明度与混色",
+        "边缘子像素"
+      ]
+    },
+    {
+      "id": "product-png",
+      "path": "product/png.mjs",
+      "role": [
+        "逐像素合成",
+        "边缘子像素"
+      ]
+    },
+    {
+      "id": "product-index",
+      "path": "product/index.mjs",
+      "role": [
+        "逐像素合成",
+        "导入文档",
+        "冻结校样"
+      ]
+    },
+    {
+      "id": "product-transform",
+      "path": "product/transform.mjs",
+      "role": [
+        "局部轮廓变换"
+      ]
+    },
+    {
+      "id": "product-shapes",
+      "path": "product/shapes.mjs",
+      "role": [
+        "局部轮廓变换",
+        "几何遮罩链"
+      ]
+    },
+    {
+      "id": "product-masks",
+      "path": "product/masks.mjs",
+      "role": [
+        "几何遮罩链",
+        "边缘子像素"
+      ]
+    },
+    {
+      "id": "product-color",
+      "path": "product/color.mjs",
+      "role": [
+        "透明度与混色"
+      ]
+    },
+    {
+      "id": "product-blend",
+      "path": "product/blend.mjs",
+      "role": [
+        "透明度与混色"
+      ]
+    },
+    {
+      "id": "server-router",
+      "path": "server/router.mjs",
+      "role": [
+        "导入文档",
+        "冻结校样",
+        "下载版本产物",
+        "重启后复取",
+        "完整性复核"
+      ]
+    },
+    {
+      "id": "server-request-body",
+      "path": "server/request-body.mjs",
+      "role": [
+        "导入文档"
+      ]
+    },
+    {
+      "id": "server-library",
+      "path": "server/library.mjs",
+      "role": [
+        "冻结校样",
+        "下载版本产物",
+        "重启后复取",
+        "完整性复核"
+      ]
+    },
+    {
+      "id": "server-canonical",
+      "path": "server/canonical.mjs",
+      "role": [
+        "冻结校样",
+        "下载版本产物",
+        "重启后复取",
+        "完整性复核"
+      ]
+    },
+    {
+      "id": "server-atomic-write",
+      "path": "server/atomic-write.mjs",
+      "role": [
+        "冻结校样"
+      ]
+    },
+    {
+      "id": "server-environment",
+      "path": "server/environment.mjs",
+      "role": [
+        "重启后复取"
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "proof",
+      "name": "逐像素合成",
+      "entry": "POST /api/preview",
+      "success": "在有限预算内输出带透明的 PNG 与像素统计",
+      "failure": "非法画布尺寸或轮廓拒绝",
+      "verification": "node tools/workflow.mjs proof",
+      "steps": [
+        "从 POST /api/preview 提交或读取数据",
+        "在有限预算内输出带透明的 PNG 与像素统计"
+      ],
+      "module_ids": [
+        "product-document",
+        "product-raster",
+        "product-png",
+        "product-index"
+      ]
+    },
+    {
+      "id": "transform",
+      "name": "局部轮廓变换",
+      "entry": "POST /api/preview 的 transform",
+      "success": "旋转和缩放后仍按局部轮廓判覆盖",
+      "failure": "零缩放拒绝",
+      "verification": "node tools/workflow.mjs transform",
+      "steps": [
+        "从 POST /api/preview 的 transform 提交或读取数据",
+        "旋转和缩放后仍按局部轮廓判覆盖"
+      ],
+      "module_ids": [
+        "product-document",
+        "product-transform",
+        "product-shapes",
+        "product-raster"
+      ]
+    },
+    {
+      "id": "masks",
+      "name": "几何遮罩链",
+      "entry": "POST /api/preview 的 mask",
+      "success": "隐藏遮罩仍参与前序链相交但不着色",
+      "failure": "缺失、向后或自引用拒绝",
+      "verification": "node tools/workflow.mjs masks",
+      "steps": [
+        "从 POST /api/preview 的 mask 提交或读取数据",
+        "隐藏遮罩仍参与前序链相交但不着色"
+      ],
+      "module_ids": [
+        "product-document",
+        "product-masks",
+        "product-shapes",
+        "product-raster"
+      ]
+    },
+    {
+      "id": "blend",
+      "name": "透明度与混色",
+      "entry": "POST /api/preview 的 blend",
+      "success": "正常、乘色和滤色按图层顺序合成",
+      "failure": "未知色值或混合模式拒绝",
+      "verification": "node tools/workflow.mjs blend",
+      "steps": [
+        "从 POST /api/preview 的 blend 提交或读取数据",
+        "正常、乘色和滤色按图层顺序合成"
+      ],
+      "module_ids": [
+        "product-document",
+        "product-color",
+        "product-blend",
+        "product-raster"
+      ]
+    },
+    {
+      "id": "sampling",
+      "name": "边缘子像素",
+      "entry": "POST /api/preview 的 samples",
+      "success": "网格子样点先合成后求平均，输出保留边缘透明度",
+      "failure": "超过预算拒绝",
+      "verification": "node tools/workflow.mjs sampling",
+      "steps": [
+        "从 POST /api/preview 的 samples 提交或读取数据",
+        "网格子样点先合成后求平均，输出保留边缘透明度"
+      ],
+      "module_ids": [
+        "product-document",
+        "product-masks",
+        "product-raster",
+        "product-png"
+      ]
+    },
+    {
+      "id": "import",
+      "name": "导入文档",
+      "entry": "POST /api/preview",
+      "success": "规范输入进入校样计算",
+      "failure": "非法 UTF-8、JSON 或字段直接拒绝；不覆盖已有冻结资产",
+      "verification": "node tools/workflow.mjs import",
+      "steps": [
+        "从 POST /api/preview 提交或读取数据",
+        "规范输入进入校样计算"
+      ],
+      "module_ids": [
+        "server-router",
+        "server-request-body",
+        "product-document",
+        "product-index"
+      ]
+    },
+    {
+      "id": "freeze",
+      "name": "冻结校样",
+      "entry": "POST /api/library",
+      "success": "相同规范输入与产物复用同一摘要；并行提交只创建一次",
+      "failure": "无法规范化的草稿不会签发",
+      "verification": "node tools/workflow.mjs freeze",
+      "steps": [
+        "从 POST /api/library 提交或读取数据",
+        "相同规范输入与产物复用同一摘要；并行提交只创建一次"
+      ],
+      "module_ids": [
+        "server-router",
+        "product-index",
+        "server-library",
+        "server-canonical",
+        "server-atomic-write"
+      ]
+    },
+    {
+      "id": "download",
+      "name": "下载版本产物",
+      "entry": "GET /api/library/:id/asset",
+      "success": "返回冻结资产原始字节、正确媒体类型和文件名",
+      "failure": "不存在的资产返回 404",
+      "verification": "node tools/workflow.mjs download",
+      "steps": [
+        "从 GET /api/library/:id/asset 提交或读取数据",
+        "返回冻结资产原始字节、正确媒体类型和文件名"
+      ],
+      "module_ids": [
+        "server-router",
+        "server-library",
+        "server-canonical"
+      ]
+    },
+    {
+      "id": "reopen",
+      "name": "重启后复取",
+      "entry": "GET /api/library 与 GET /api/library/:id",
+      "success": "恢复已有规范文档及成品校样摘要",
+      "failure": "未知或无法读取的版本不会替换当前校样",
+      "verification": "node tools/workflow.mjs reopen",
+      "steps": [
+        "从 GET /api/library 与 GET /api/library/:id 提交或读取数据",
+        "恢复已有规范文档及成品校样摘要"
+      ],
+      "module_ids": [
+        "server-environment",
+        "server-router",
+        "server-library",
+        "server-canonical"
+      ]
+    },
+    {
+      "id": "integrity",
+      "name": "完整性复核",
+      "entry": "GET /api/library/:id[/asset]",
+      "success": "元数据与媒体字节读取前均核对内容摘要",
+      "failure": "磁盘内容不匹配时返回 409",
+      "verification": "node tools/workflow.mjs integrity",
+      "steps": [
+        "从 GET /api/library/:id[/asset] 提交或读取数据",
+        "元数据与媒体字节读取前均核对内容摘要"
+      ],
+      "module_ids": [
+        "server-router",
+        "server-library",
+        "server-canonical"
+      ]
+    }
+  ],
+  "complexity": {
+    "mechanisms": [
+      "policy_rules",
+      "lineage",
+      "capacity",
+      "error_propagation",
+      "snapshot_consistency",
+      "export_freeze",
+      "recovery_rollback",
+      "versioning_audit",
+      "idempotency",
+      "concurrency"
+    ]
+  }
+}

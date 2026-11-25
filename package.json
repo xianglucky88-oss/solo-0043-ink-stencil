@@ -1,0 +1,14 @@
+{
+  "name": "ink-stencil",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server/boot.mjs",
+    "check": "node tools/check.mjs",
+    "demo": "node tools/workflow.mjs"
+  }
+}

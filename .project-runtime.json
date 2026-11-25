@@ -1,0 +1,53 @@
+{
+  "language": "JavaScript (Node.js + Browser ES modules)",
+  "project_shape": "fullstack",
+  "source_extensions": [
+    ".mjs",
+    ".html",
+    ".css"
+  ],
+  "build_command": "node tools/check.mjs",
+  "testing": "deferred",
+  "workflow_checks": [
+    {
+      "workflow_id": "proof",
+      "command": "node tools/workflow.mjs proof"
+    },
+    {
+      "workflow_id": "transform",
+      "command": "node tools/workflow.mjs transform"
+    },
+    {
+      "workflow_id": "masks",
+      "command": "node tools/workflow.mjs masks"
+    },
+    {
+      "workflow_id": "blend",
+      "command": "node tools/workflow.mjs blend"
+    },
+    {
+      "workflow_id": "sampling",
+      "command": "node tools/workflow.mjs sampling"
+    },
+    {
+      "workflow_id": "import",
+      "command": "node tools/workflow.mjs import"
+    },
+    {
+      "workflow_id": "freeze",
+      "command": "node tools/workflow.mjs freeze"
+    },
+    {
+      "workflow_id": "download",
+      "command": "node tools/workflow.mjs download"
+    },
+    {
+      "workflow_id": "reopen",
+      "command": "node tools/workflow.mjs reopen"
+    },
+    {
+      "workflow_id": "integrity",
+      "command": "node tools/workflow.mjs integrity"
+    }
+  ]
+}
