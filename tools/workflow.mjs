@@ -59,7 +59,7 @@ try {
       await read(await get(`/api/library/${id}`),409);
       await read(await get(`/api/library/${id}/asset`),409);
     },
-    ...checks({document, preview, rejected}),
+    ...checks({document, preview, rejected, save}),
   };
   const name=process.argv[2]??'proof';
   assert.ok(Object.hasOwn(actions,name),`Unknown workflow: ${name}`);

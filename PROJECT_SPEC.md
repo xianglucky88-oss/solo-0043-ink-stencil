@@ -9,7 +9,10 @@
 
 - `width,height` 为 16–512 px，`samples` 为 1 或 2，最多 16 层。`width × height × samples² × layers` 不超过 8,000,000。
 - `layers` 从底到顶排列。轮廓为 `ellipse`、`rect`（支持半径 `radius`）或 `diamond`。局部原点在形状中心；`transform` 先沿 X/Y 缩放、再旋转（屏幕坐标下正角顺时针）、最后移动中心。
-- `mask` 为空或指向前序层唯一 ID；对每个子样点，沿前序链取几何交集，遮罩不读取颜色、`visible` 或透明度。隐藏层仅用于几何判定，不绘制。
+- 遮罩按图层唯一 ID 引用，可指向画面堆栈中的任意位置，与图层叠放顺序无关；调换层序只改变有色区域的遮盖，不重接已有裁边关系。旧写法 `mask` 为空或指向单个图层 ID，等价于单遮罩交集。
+- 新写法 `masks` 为 1–2 项：首项 `operation` 为 `intersect`，与自身轮廓取交集；第二项用 `union` 把遮罩轮廓并入，或用 `subtract` 从第一个遮罩轮廓里扣除。取用的是每个遮罩按当前放置和自身裁边后留下的轮廓。
+- 对每个子样点做布尔几何组合，而不是叠加两张已经平滑的遮罩；两倍采样时扣孔或拼接即使经过像素中心，也保留图案原色与正确的半透明边，不漏出半透明圈。遮罩不读取颜色、`visible` 或透明度：隐藏层、透明色或零不透明度的图层仍提供完整轮廓，但本身不绘制。
+- 找不到的遮罩、自引用或绕一圈回到自身的成环关系，更新校样与冻结都拒绝该文档，不会以未裁画面顶替。
 - 颜色为 `#RRGGBB` 或 `#RRGGBBAA`，`opacity` 与颜色 alpha 相乘。`normal`、`multiply`、`screen` 在输入编码的 RGB 数值空间按 source-over 合成。采样后平均预乘值，再还原到直通 alpha RGBA PNG；完全透明的像素编码为零。
 - `hits` 统计绘制时通过几何的子样点，不等于最后仍可见的贡献。页面的 Canvas 像素读数遵循浏览器的颜色/alpha 表示；PNG 原始字节以下载件为准。
 
@@ -19,7 +22,7 @@
 | --- | --- | --- | --- | --- |
 | 逐像素合成 | `POST /api/preview` | 在有限预算内输出带透明的 PNG 与像素统计 | 非法画布尺寸或轮廓拒绝 | `node tools/workflow.mjs proof` |
 | 局部轮廓变换 | `POST /api/preview 的 transform` | 旋转和缩放后仍按局部轮廓判覆盖 | 零缩放拒绝 | `node tools/workflow.mjs transform` |
-| 几何遮罩链 | `POST /api/preview 的 mask` | 隐藏遮罩仍参与前序链相交但不着色 | 缺失、向后或自引用拒绝 | `node tools/workflow.mjs masks` |
+| 几何遮罩图 | `POST /api/preview 的 mask/masks` | 任意堆栈位置的遮罩按交/并/扣参与子样点布尔裁边，隐藏遮罩不着色 | 缺失、自引用或成环拒绝，更新与冻结均不签发 | `node tools/workflow.mjs masks` |
 | 透明度与混色 | `POST /api/preview 的 blend` | 正常、乘色和滤色按图层顺序合成 | 未知色值或混合模式拒绝 | `node tools/workflow.mjs blend` |
 | 边缘子像素 | `POST /api/preview 的 samples` | 网格子样点先合成后求平均，输出保留边缘透明度 | 超过预算拒绝 | `node tools/workflow.mjs sampling` |
 | 导入文档 | `POST /api/preview` | 规范输入进入校样计算 | 非法 UTF-8、JSON 或字段直接拒绝；不覆盖已有冻结资产 | `node tools/workflow.mjs import` |

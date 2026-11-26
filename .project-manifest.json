@@ -7,7 +7,7 @@
       "role": [
         "逐像素合成",
         "局部轮廓变换",
-        "几何遮罩链",
+        "几何遮罩图",
         "透明度与混色",
         "边缘子像素",
         "导入文档"
@@ -19,7 +19,7 @@
       "role": [
         "逐像素合成",
         "局部轮廓变换",
-        "几何遮罩链",
+        "几何遮罩图",
         "透明度与混色",
         "边缘子像素"
       ]
@@ -53,14 +53,14 @@
       "path": "product/shapes.mjs",
       "role": [
         "局部轮廓变换",
-        "几何遮罩链"
+        "几何遮罩图"
       ]
     },
     {
       "id": "product-masks",
       "path": "product/masks.mjs",
       "role": [
-        "几何遮罩链",
+        "几何遮罩图",
         "边缘子像素"
       ]
     },
@@ -170,14 +170,14 @@
     },
     {
       "id": "masks",
-      "name": "几何遮罩链",
-      "entry": "POST /api/preview 的 mask",
-      "success": "隐藏遮罩仍参与前序链相交但不着色",
-      "failure": "缺失、向后或自引用拒绝",
+      "name": "几何遮罩图",
+      "entry": "POST /api/preview 的 mask/masks",
+      "success": "任意堆栈位置的遮罩按交/并/扣参与子样点布尔裁边，隐藏遮罩不着色",
+      "failure": "缺失、自引用或成环拒绝，更新与冻结均不签发",
       "verification": "node tools/workflow.mjs masks",
       "steps": [
-        "从 POST /api/preview 的 mask 提交或读取数据",
-        "隐藏遮罩仍参与前序链相交但不着色"
+        "从 POST /api/preview 的 mask/masks 提交或读取数据",
+        "按唯一 ID 引用任意位置遮罩并在子样点做交并扣布尔组合，隐藏遮罩不着色"
       ],
       "module_ids": [
         "product-document",

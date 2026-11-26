@@ -5,16 +5,20 @@ import { over } from './blend.mjs';
 
 export function raster(document) {
   const { width,height,samples }=document;
+  const indexOf=new Map(document.layers.map((layer,index)=>[layer.id,index]));
   const layers=document.layers.map(layer=>({ ...layer, rgba:channels(layer.color), toLocal:inverse(layer.transform),
-    maskIndex:document.layers.findIndex(row=>row.id===layer.mask), hits:0 }));
+    maskIndex:layer.mask==null?-1:indexOf.get(layer.mask),
+    maskIndices:(layer.masks??[]).map(entry=>({index:indexOf.get(entry.id),operation:entry.operation})),
+    hits:0 }));
   const pixels=Buffer.alloc(width*height*4);
   const covered=new Uint8Array(layers.length);
+  covered.stamp=new Uint32Array(layers.length);
   const pixel=new Float64Array(4), sum=new Float64Array(4);
-  let painted=0, partial=0;
+  let painted=0, partial=0, stamp=0;
   for (let y=0;y<height;y++) for (let x=0;x<width;x++) {
     sum.fill(0);
     for (let sy=0;sy<samples;sy++) for (let sx=0;sx<samples;sx++) {
-      sampleCoverage(layers,x+(sx+.5)/samples,y+(sy+.5)/samples,covered);
+      sampleCoverage(layers,x+(sx+.5)/samples,y+(sy+.5)/samples,covered,++stamp);
       pixel.fill(0);
       for (let i=0;i<layers.length;i++) {
         const layer=layers[i], alpha=layer.opacity*layer.rgba[3];
