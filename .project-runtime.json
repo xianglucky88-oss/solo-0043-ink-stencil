@@ -30,6 +30,10 @@
       "command": "node tools/workflow.mjs sampling"
     },
     {
+      "workflow_id": "incremental",
+      "command": "node tools/workflow.mjs incremental"
+    },
+    {
       "workflow_id": "import",
       "command": "node tools/workflow.mjs import"
     },

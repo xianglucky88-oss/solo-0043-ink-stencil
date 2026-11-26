@@ -20,6 +20,8 @@ main{max-width:1366px;padding:0 18px 30px;margin:0 auto}
 .record h2{font:650 24px/1.2 ui-monospace,monospace;margin:5px 0 0;overflow-wrap:anywhere}
 #status{color:var(--muted);overflow-wrap:anywhere;max-width:620px}
 #status[data-error=true]{color:#ff9d94}
+#status[data-pending=true]{color:var(--accent)}
+#status[data-dirty=true]:not([data-error=true]){color:#e8c98a}
 .workspace{display:grid;grid-template-columns:minmax(0,1fr) 305px;border:1px solid var(--line);background:var(--surface);border-radius:6px;overflow:hidden}
 .workspace>*{min-width:0}
 .inspector{border-left:1px solid var(--line)}

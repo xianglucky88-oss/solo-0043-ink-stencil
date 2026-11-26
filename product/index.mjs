@@ -5,7 +5,8 @@ export { normalize } from './document.mjs';
 export { demo } from './demo.mjs';
 
 export function render(document) {
-  const { id,width,height,samples }=document;
-  const {pixels,painted,partial,layers}=raster(document);
-  return { bytes:png(width,height,pixels), summary:{id,width,height,samples,painted,partial,layers} };
+  const { id }=document;
+  const { width,height,pixels,painted,partial,layers }=raster(document);
+  const bytes=png(width,height,pixels);
+  return { pixels, bytes, summary:{id,width,height,samples:document.samples,painted,partial,layers} };
 }

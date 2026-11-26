@@ -21,7 +21,15 @@
         "局部轮廓变换",
         "几何遮罩链",
         "透明度与混色",
-        "边缘子像素"
+        "边缘子像素",
+        "连续局部校样"
+      ]
+    },
+    {
+      "id": "product-incremental",
+      "path": "product/incremental.mjs",
+      "role": [
+        "连续局部校样"
       ]
     },
     {
@@ -29,7 +37,8 @@
       "path": "product/png.mjs",
       "role": [
         "逐像素合成",
-        "边缘子像素"
+        "边缘子像素",
+        "连续局部校样"
       ]
     },
     {
@@ -38,14 +47,16 @@
       "role": [
         "逐像素合成",
         "导入文档",
-        "冻结校样"
+        "冻结校样",
+        "连续局部校样"
       ]
     },
     {
       "id": "product-transform",
       "path": "product/transform.mjs",
       "role": [
-        "局部轮廓变换"
+        "局部轮廓变换",
+        "连续局部校样"
       ]
     },
     {
@@ -86,7 +97,15 @@
         "冻结校样",
         "下载版本产物",
         "重启后复取",
-        "完整性复核"
+        "完整性复核",
+        "连续局部校样"
+      ]
+    },
+    {
+      "id": "server-preview-cache",
+      "path": "server/preview-cache.mjs",
+      "role": [
+        "连续局部校样"
       ]
     },
     {
@@ -220,6 +239,29 @@
         "product-masks",
         "product-raster",
         "product-png"
+      ]
+    },
+    {
+      "id": "incremental",
+      "name": "连续局部校样",
+      "entry": "POST /api/preview 的 {base,document} 信封",
+      "success": "仅隐藏遮罩移动时局部重算，画面与统计和该稿整图渲染逐字节一致；晚到响应不覆盖新校样",
+      "failure": "画布或采样变化、可见层改动回退整图；缓存未命中现场重建；请求拒绝保留上一份成功校样",
+      "verification": "node tools/workflow.mjs incremental",
+      "steps": [
+        "比对 base 与 document 的图层差异，判定是否仅隐藏遮罩移动",
+        "按移动遮罩新旧包围盒求受影响像素矩形",
+        "仅对矩形内像素重做覆盖判定与混色并拼回基准像素",
+        "按请求序号丢弃晚到结果，拒绝时保留上一份成功校样"
+      ],
+      "module_ids": [
+        "product-raster",
+        "product-incremental",
+        "product-transform",
+        "product-png",
+        "product-index",
+        "server-router",
+        "server-preview-cache"
       ]
     },
     {

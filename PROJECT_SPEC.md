@@ -22,6 +22,7 @@
 | 几何遮罩链 | `POST /api/preview 的 mask` | 隐藏遮罩仍参与前序链相交但不着色 | 缺失、向后或自引用拒绝 | `node tools/workflow.mjs masks` |
 | 透明度与混色 | `POST /api/preview 的 blend` | 正常、乘色和滤色按图层顺序合成 | 未知色值或混合模式拒绝 | `node tools/workflow.mjs blend` |
 | 边缘子像素 | `POST /api/preview 的 samples` | 网格子样点先合成后求平均，输出保留边缘透明度 | 超过预算拒绝 | `node tools/workflow.mjs sampling` |
+| 连续局部校样 | `POST /api/preview` 的 `{base,document}` 信封 | 仅隐藏遮罩移动时局部重算，结果与整图渲染逐字节一致；晚到响应不覆盖新校样 | 画布/采样变化或可见层改动回退整图；缓存未命中现场重建 | `node tools/workflow.mjs incremental` |
 | 导入文档 | `POST /api/preview` | 规范输入进入校样计算 | 非法 UTF-8、JSON 或字段直接拒绝；不覆盖已有冻结资产 | `node tools/workflow.mjs import` |
 | 冻结校样 | `POST /api/library` | 相同规范输入与产物复用同一摘要；并行提交只创建一次 | 无法规范化的草稿不会签发 | `node tools/workflow.mjs freeze` |
 | 下载版本产物 | `GET /api/library/:id/asset` | 返回冻结资产原始字节、正确媒体类型和文件名 | 不存在的资产返回 404 | `node tools/workflow.mjs download` |
@@ -33,25 +34,35 @@
 | 模块 | 参与的生产工作流 |
 | --- | --- |
 | `product/document.mjs` | 逐像素合成、局部轮廓变换、几何遮罩链、透明度与混色、边缘子像素、导入文档 |
-| `product/raster.mjs` | 逐像素合成、局部轮廓变换、几何遮罩链、透明度与混色、边缘子像素 |
-| `product/png.mjs` | 逐像素合成、边缘子像素 |
-| `product/index.mjs` | 逐像素合成、导入文档、冻结校样 |
-| `product/transform.mjs` | 局部轮廓变换 |
+| `product/raster.mjs` | 逐像素合成、局部轮廓变换、几何遮罩链、透明度与混色、边缘子像素、连续局部校样 |
+| `product/incremental.mjs` | 连续局部校样 |
+| `product/png.mjs` | 逐像素合成、边缘子像素、连续局部校样 |
+| `product/index.mjs` | 逐像素合成、导入文档、冻结校样、连续局部校样 |
+| `product/transform.mjs` | 局部轮廓变换、连续局部校样 |
 | `product/shapes.mjs` | 局部轮廓变换、几何遮罩链 |
 | `product/masks.mjs` | 几何遮罩链、边缘子像素 |
 | `product/color.mjs` | 透明度与混色 |
 | `product/blend.mjs` | 透明度与混色 |
-| `server/router.mjs` | 导入文档、冻结校样、下载版本产物、重启后复取、完整性复核 |
+| `server/router.mjs` | 导入文档、冻结校样、下载版本产物、重启后复取、完整性复核、连续局部校样 |
+| `server/preview-cache.mjs` | 连续局部校样 |
 | `server/request-body.mjs` | 导入文档 |
 | `server/library.mjs` | 冻结校样、下载版本产物、重启后复取、完整性复核 |
-| `server/canonical.mjs` | 冻结校样、下载版本产物、重启后复取、完整性复核 |
+| `server/canonical.mjs` | 冻结校样、下载版本产物、重启后复取、完整性复核、连续局部校样 |
 | `server/atomic-write.mjs` | 冻结校样 |
 | `server/environment.mjs` | 重启后复取 |
 
-`web/app.mjs`协调编辑与预览生命周期；`web/surface.mjs`装配本产品校样组件。HTML、CSS、DOM、Canvas 或 HTML Audio 均为原生，无前端框架。
+`web/app.mjs`协调编辑与预览生命周期；`web/proof-session.mjs`纯逻辑管理请求序号、晚到响应丢弃与脏稿标记；`web/surface.mjs`装配本产品校样组件。HTML、CSS、DOM、Canvas 或 HTML Audio 均为原生，无前端框架。
 
 ## 存储和验证边界
 
-请求 JSON 最多 6 MiB。预览不持久化。冻结摘要绑定规则版本、规范文档、摘要指标和导出字节。单个文件通过同目录临时文件和排他硬链接发布，同内容重复提交复用原版本。复取会校验内容摘要；最近版本列表只显示最新 20 个。临时文件与最终目录需要位于支持硬链接的本机文件系统上。本应用不提供跨机器同步、账号权限或面向网络的部署。
+请求 JSON 最多 6 MiB。预览不持久化：局部校样的基准像素只保存在进程内 LRU 缓存（默认 64 份，重启即失），冻结摘要绑定规则版本、规范文档、摘要指标和导出字节。单个文件通过同目录临时文件和排他硬链接发布，同内容重复提交复用原版本。复取会校验内容摘要；最近版本列表只显示最新 20 个。临时文件与最终目录需要位于支持硬链接的本机文件系统上。本应用不提供跨机器同步、账号权限或面向网络的部署。
+
+### 连续局部校样规则
+
+- 预览请求可发送 `{base, document}` 信封，`base` 为上一份成功提交的规范稿；不带信封或 `base` 为空时按整图渲染。
+- 仅当画布尺寸、采样倍率、图层数量与顺序、各层静态声明（轮廓、颜色、不透明度、混合、遮罩引用、可见性）完全一致，且差异只包含隐藏层 `transform` 时，才走局部重算；移动可见层、改画布或采样倍率一律整图重算。冻结与重新打开冻结件不受影响。
+- 受影响像素矩形由移动遮罩新旧变换包围盒，对所有子样点求并集得到。矩形内每个像素只计一次，不因子样点数量重复；矩形外像素只搬运或编码，不计入重算。
+- 局部结果在矩形外复用基准像素、矩形内按新稿重算并拼回，再统一 PNG 编码；其画面、像素探针、非透明/半透明像素数、图层样本数与对新稿从头整图渲染逐字节一致。
+- 每次提交获得单调序号；只有最新请求的成功结果能替换显示校样，较早请求的晚到结果或任何拒绝都不覆盖新校样，也不回写编辑器。拒绝或在途时可继续展示最近一次成功校样，但状态文案必须说明它不对应编辑器现稿。
 
 完整自动化测试套件暂缓。`.project-runtime.json` 中的工作流命令从真实路由操作临时工作目录，不改变用户版本库。

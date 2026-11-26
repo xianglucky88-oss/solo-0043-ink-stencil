@@ -11,8 +11,18 @@ export async function get(path) {
   return (await checked(path)).json();
 }
 
-export async function post(path,document) {
-  return (await checked(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(document)})).json();
+async function send(path,payload) {
+  return (await checked(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})).json();
+}
+
+export function post(path,document) {
+  return send(path,document);
+}
+
+// Preview submissions carry the previous successful submission so the server
+// can repaint just the moved-mask region when the edit stays local.
+export function preview({base,document}) {
+  return send('/api/preview',{base,document});
 }
 
 export async function artifact(id) {
