@@ -33,6 +33,16 @@
         <div class="panel-head"><h3>参数</h3></div>
         <div id="controls"></div>
         <div id="inspection"></div>
+        <section class="details" id="plate-assign-panel" aria-labelledby="plate-assign-title">
+          <h4 id="plate-assign-title">墨版分色 · 两支专色</h4>
+          <p class="muted">为每层指定归哪支墨、叠印或挖空；未指定的层不下墨。屏幕颜色与混色不决定墨种。隐藏裁边层只裁形。</p>
+          <div id="plate-layers"></div>
+          <div id="plate-output" class="plate-output" aria-live="polite"></div>
+        </section>
+        <section class="details" id="plate-bench-panel" aria-labelledby="plate-bench-title">
+          <h4 id="plate-bench-title">版文件 · 白纸套印校样</h4>
+          <div id="plate-bench"></div>
+        </section>
         <details class="details"><summary>源文档</summary><div id="editor-extras"></div><textarea id="document" aria-label="JSON 工作文档" wrap="off" spellcheck="false"></textarea></details>
         <details class="details" open><summary>冻结版本</summary><div id="versions"></div></details>
       </aside>

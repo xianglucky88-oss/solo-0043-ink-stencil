@@ -4,10 +4,12 @@ import { mountFields } from './fields.mjs';
 import { parseDocument, readFile, updateDocument } from './documents.mjs';
 import { refreshVersions } from './versions.mjs';
 import { fields, present, mountImport } from './surface.mjs';
+import { mountPlateAssignment, showPlateFiles } from './plate-assign.mjs';
+import { mountPlateBench } from './plate-bench.mjs';
 
 const editor=$('document'), status=$('status'), stage=$('stage');
 const actions=['demo','freeze','render','import'].map($);
-let metadata,busy=false,dispose,url;
+let metadata,busy=false,dispose,url,plateBench,lastPlatePayload;
 
 function note(message,error=false) { status.value=message; status.dataset.error=String(error); }
 
@@ -23,17 +25,22 @@ function setDocument(document) {
     try { setDocument(updateDocument(editor.value,keys,value)); dirty(); }
     catch(error) { note(error.message,true); }
   });
+  mountPlateAssignment($('plate-layers'),document,next=>{
+    setDocument(next); dirty();
+  });
 }
 
 async function task(fn) {
   if(busy) return;
   busy=true; for(const action of actions) action.disabled=true;
   editor.readOnly=true; $('controls').inert=true; $('editor-extras').inert=true;
+  const platePanel=$('plate-assign-panel'); if(platePanel) platePanel.inert=true;
   try { await fn(); }
   catch(error) { note(error.message,true); }
   finally {
     busy=false; for(const action of actions) action.disabled=false;
     editor.readOnly=false; $('controls').inert=false; $('editor-extras').inert=false;
+    if(platePanel) platePanel.inert=false;
   }
 }
 
@@ -52,10 +59,12 @@ function showDownload(id) {
 }
 
 async function preview(document) {
-  $('download').hidden=true; note('正在生成校样…');
-  const {summary,base64}=await post('/api/preview',document);
-  await display(document,summary,decode(base64,metadata.asset));
-  note('校样已更新');
+  $('download').hidden=true; note('正在生成校样与墨版…');
+  const result=await post('/api/preview',document);
+  await display(document,result.summary,decode(result.base64,metadata.asset));
+  lastPlatePayload=result;
+  showPlateFiles($('plate-output'),result,decode);
+  note('校样与两张墨版已更新');
 }
 
 async function loadDemo() {
@@ -93,4 +102,9 @@ editor.onchange=()=>{
 };
 mountImport?.($('editor-extras'),()=>parseDocument(editor.value),document=>{setDocument(document);dirty();},message=>note(message,true));
 $('inspection').append(el('p','等待校样','muted'));
+plateBench=mountPlateBench($('plate-bench'));
+$('plate-bench').addEventListener('bench-use-current',()=>{
+  if(lastPlatePayload?.plateFiles) plateBench.loadCurrent(lastPlatePayload);
+  else note('请先更新校样以生成当前墨版',true);
+});
 await task(async()=>{await loadDemo();await listVersions();});

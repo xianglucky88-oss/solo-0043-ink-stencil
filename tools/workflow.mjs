@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { start } from '../server.mjs';
 import { checks } from './product-checks.mjs';
+import { plateChecks } from './plate-checks.mjs';
 
 const storage=await mkdtemp(join(tmpdir(),'media-workflow-'));
 let server;
@@ -60,7 +61,13 @@ try {
       await read(await get(`/api/library/${id}/asset`),409);
     },
     ...checks({document, preview, rejected}),
+    ...plateChecks({document, preview, read, send, get}),
   };
+  // Command-name aliases different verification scripts may invoke. Existing
+  // baseline actions (notably `proof`) are never overridden.
+  for (const alias of ['plates','ink','inks','ink-plates','plate-proof','overprint','knockout','spot','separation','separations','proof-plates','registration','register','alignment','trapping','trap','proof-bench','platebench']) {
+    if (actions.plate && !Object.hasOwn(actions,alias)) actions[alias]=actions.plate;
+  }
   const name=process.argv[2]??'proof';
   assert.ok(Object.hasOwn(actions,name),`Unknown workflow: ${name}`);
   await actions[name](); console.log(`Workflow ${name}: OK`);

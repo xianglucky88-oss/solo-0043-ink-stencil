@@ -310,6 +310,24 @@
         "server-library",
         "server-canonical"
       ]
+    },
+    {
+      "id": "plate",
+      "name": "专色墨版与套印校样",
+      "entry": "POST /api/plates 与 POST /api/plate-proof",
+      "success": "生成两张非隔行八位灰度墨版 PNG，并凭版文件完成白纸 sRGB 乘积套印校样",
+      "failure": "版文件规格不符或两版尺寸不一致时拒绝出校样",
+      "verification": "node tools/workflow.mjs plate",
+      "steps": [
+        "从工作稿按层的墨版归属与叠印/挖空逐子样点生成两张灰度版",
+        "读取两张八位灰度版 PNG，按整像素挪位并在 sRGB 编码值上做白纸乘积校样"
+      ],
+      "module_ids": [
+        "product-plates",
+        "product-png",
+        "product-document",
+        "server-router"
+      ]
     }
   ],
   "complexity": {

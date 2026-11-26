@@ -6,3 +6,39 @@
 .layer-list li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:41px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
 .layer-list li:last-child{border-bottom:0}.layer-list small{display:block;color:var(--muted)}.layer-list span{font-size:10px}
 .swatch{width:18px;height:18px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px #ffffff40}
+
+/* Ink plate assignment */
+#plate-layers{display:flex;flex-direction:column;gap:6px;margin:8px 0 4px}
+.plate-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.plate-row:last-child{border-bottom:0}
+.plate-layer-label{min-width:0}
+.plate-layer-label strong{display:block;font-size:12px;overflow-wrap:anywhere}
+.plate-layer-label small{display:block;color:var(--muted);font-size:10px;overflow-wrap:anywhere}
+.plate-row-controls{display:flex;gap:5px}
+.plate-row-controls select{min-height:28px;padding:2px 4px;font-size:12px;max-width:96px}
+.plate-output{margin-top:10px}
+.plate-thumbs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.plate-thumb{margin:0;min-width:0}
+.plate-thumb img{width:100%;height:132px;object-fit:contain;background:#e9e9e4;border-radius:4px;image-rendering:pixelated;display:block}
+.plate-thumb figcaption{font-size:11px;margin-top:4px;overflow-wrap:anywhere}
+.plate-hint{font-size:11px;margin:7px 0 0}
+
+/* File-based overprint proof bench */
+#plate-bench{display:flex;flex-direction:column;gap:9px;margin-top:9px}
+.file-button{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:6px 11px;border:1px solid #51595d;border-radius:5px;background:#25292c;cursor:pointer;font-size:13px;text-decoration:none;color:inherit}
+.file-button:hover{border-color:var(--accent)}
+.bench-file-row{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.bench-file-meta{font-size:11px;overflow-wrap:anywhere}
+.bench-colors{display:flex;gap:14px;flex-wrap:wrap}
+.bench-colors label{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.bench-colors input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #51595d;border-radius:5px;background:#25292c;cursor:pointer}
+.bench-shift{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.bench-shift select{min-height:30px;padding:3px 6px}
+.bench-shift input[type=number]{width:64px;min-height:30px;padding:3px 6px}
+.nudge-pad{display:grid;grid-template-columns:repeat(4,auto);gap:4px}
+.nudge-pad button{min-width:34px;min-height:30px;padding:2px 6px}
+#bench-status{font-size:11px;min-height:16px}
+.bench-error{color:#ff9d94!important}
+.bench-canvas-wrap{background:#fff;border-radius:4px;padding:8px;display:flex;justify-content:center;max-height:360px;overflow:auto}
+.bench-canvas{max-width:100%;height:auto;image-rendering:pixelated}
+#plate-bench .file-button{align-self:flex-start}

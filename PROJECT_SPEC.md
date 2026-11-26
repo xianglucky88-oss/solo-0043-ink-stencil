@@ -13,6 +13,15 @@
 - 颜色为 `#RRGGBB` 或 `#RRGGBBAA`，`opacity` 与颜色 alpha 相乘。`normal`、`multiply`、`screen` 在输入编码的 RGB 数值空间按 source-over 合成。采样后平均预乘值，再还原到直通 alpha RGBA PNG；完全透明的像素编码为零。
 - `hits` 统计绘制时通过几何的子样点，不等于最后仍可见的贡献。页面的 Canvas 像素读数遵循浏览器的颜色/alpha 表示；PNG 原始字节以下载件为准。
 
+## 专色墨版与套印校样
+
+- 每层可指定 `plate: "a" | "b" | null`（归哪支墨）和 `overprint: boolean`（`true` 叠印、`false` 挖空）。未指定墨版的层不下墨；`color`、`blend` 不决定墨种或挖空。隐藏层只参与几何/遮罩，不下墨。
+- 两张墨版与工作稿画布同尺寸，为不带透明度的非隔行 8 位灰度 PNG（IHDR 颜色类型 0、位深 8、隔行方法 0）；灰度 0 无墨、255 满墨。
+- 逐子样点计算。有效不透明度 `α = color AA/255 × opacity`。在该层通过几何的子样点：本墨量满足 `1−m'=(1−m)(1−α)`；叠印时另一支墨不变，挖空时另一支墨 `n'=n(1−α)`。像素灰度为 `round_half_up(255 × Σ子样点墨量 / samples²)`。基准算例：两倍采样、底墨满印、两笔经同一裁边盖住同一像素相同的一半样点、上笔 `α=.5`，叠印为 128/64，挖空为 64/64。
+- 套印校样只凭两张版文件，可不打开源稿。任选一版按整像素 `dx/dy` 挪位，纸面尺寸与另一版不变；版外采样为 0，移出纸面的墨不出现。
+- 每支墨指定 8 位 sRGB 满印模拟色 `C`。墨量 `t=g/255` 时单墨归一化通道为 `1+(C/255−1)t`（白与满印色在 sRGB 编码值上线性插值，不做线性光转换）；两墨同处时输出归一化通道为两支单墨通道之积。纸面为不透明 RGB，逐通道 `round_half_up(255·乘积)`。
+- 校样输入须为非隔行 8 位灰度 PNG，且两版宽高一致；否则 422 且不出图。`POST /api/plate-proof` 接受 JSON base64（`a`/`b`、`colorA`/`colorB`、`shiftA`/`shiftB`）或 `multipart/form-data` 文件。浏览器端 `web/plate-bench.mjs` 在本机完成同样的校样。
+
 ## 工作流
 
 | 工作流 | 接口 | 正常结果 | 替代或失败结果 | 生产检查 |
@@ -27,6 +36,7 @@
 | 下载版本产物 | `GET /api/library/:id/asset` | 返回冻结资产原始字节、正确媒体类型和文件名 | 不存在的资产返回 404 | `node tools/workflow.mjs download` |
 | 重启后复取 | `GET /api/library 与 GET /api/library/:id` | 恢复已有规范文档及成品校样摘要 | 未知或无法读取的版本不会替换当前校样 | `node tools/workflow.mjs reopen` |
 | 完整性复核 | `GET /api/library/:id[/asset]` | 元数据与媒体字节读取前均核对内容摘要 | 磁盘内容不匹配时返回 409 | `node tools/workflow.mjs integrity` |
+| 专色墨版与套印校样 | `POST /api/plates`、`POST /api/plate-proof`、`POST /api/preview` 附加墨版 | 输出两张非隔行 8 位灰度墨版 PNG；凭两张版文件做白纸 sRGB 乘积校样 | 版文件规格不符或两版尺寸不一致不出校样（422） | `node tools/workflow.mjs plate` |
 
 ## 代码职责
 
