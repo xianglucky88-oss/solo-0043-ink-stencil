@@ -26,7 +26,7 @@
     </div>
     <div class="workspace">
       <section class="stage" aria-labelledby="stage-title">
-        <div class="panel-head"><h3 id="stage-title">校样</h3><a id="download" hidden download>下载产物</a></div>
+        <div class="panel-head"><h3 id="stage-title">校样</h3><div class="head-links"><a id="download" hidden download>下载原 PNG</a><a id="download-tile" hidden download>导出铺贴小图</a><a href="/tile-proof.html" target="_blank" rel="noopener">离线铺贴台</a></div></div>
         <div id="stage"></div>
       </section>
       <aside class="inspector" aria-label="编辑与检查">
@@ -37,6 +37,27 @@
         <details class="details" open><summary>冻结版本</summary><div id="versions"></div></details>
       </aside>
     </div>
+
+    <section class="tile-lab panel" aria-labelledby="tile-lab-title">
+      <div class="panel-head">
+        <h3 id="tile-lab-title">离线铺贴校样</h3>
+        <a href="/tile-proof.html" target="_blank" rel="noopener">打开独立离线台</a>
+      </div>
+      <div class="tile-lab-body">
+        <label class="tile-file">实际交付 PNG
+          <input id="tile-source" type="file" accept="image/png,.png" aria-label="离线打开实际交付的铺贴 PNG">
+        </label>
+        <label>输出宽度<input id="tile-out-width" name="outputWidth" aria-label="输出宽度 outputWidth width" type="number" min="1" step="1" value="160"></label>
+        <label>输出高度<input id="tile-out-height" name="outputHeight" aria-label="输出高度 outputHeight height" type="number" min="1" step="1" value="120"></label>
+        <label>起点 X / 左上角横坐标<input id="tile-offset-x" name="offsetX" aria-label="起点 X 左上角横坐标 offsetX startX originX" type="number" step="any" value="0"></label>
+        <label>起点 Y / 左上角纵坐标<input id="tile-offset-y" name="offsetY" aria-label="起点 Y 左上角纵坐标 offsetY startY originY" type="number" step="any" value="0"></label>
+        <label>缩小比例 / 倍率：每像素边长 1–32<input id="tile-cell" name="cell" aria-label="缩小比例 倍率 每像素边长 cell scale footprint" type="number" min="1" max="32" step="any" value="2"></label>
+        <button id="tile-apply" class="accent" type="button">生成铺贴校样</button>
+        <a id="tile-proof-download" hidden download="tile-proof-rgba.png">下载校样</a>
+        <output id="tile-lab-status" role="status" aria-live="polite">选择已下载的铺贴小图；此区域不请求原稿或服务。</output>
+        <div class="tile-canvas-wrap"><canvas id="tile-proof-canvas" width="160" height="120" aria-label="离线铺贴校样画布"></canvas></div>
+      </div>
+    </section>
   </main>
   <script type="module" src="/app.mjs"></script>
 </body>

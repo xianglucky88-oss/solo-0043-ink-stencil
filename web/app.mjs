@@ -4,6 +4,7 @@ import { mountFields } from './fields.mjs';
 import { parseDocument, readFile, updateDocument } from './documents.mjs';
 import { refreshVersions } from './versions.mjs';
 import { fields, present, mountImport } from './surface.mjs';
+import { mountTileLab } from './tile-lab.mjs';
 
 const editor=$('document'), status=$('status'), stage=$('stage');
 const actions=['demo','freeze','render','import'].map($);
@@ -13,6 +14,7 @@ function note(message,error=false) { status.value=message; status.dataset.error=
 
 function dirty() {
   $('download').hidden=true;
+  $('download-tile').hidden=true;
   note('工作文档已变更 · 校样待更新');
 }
 
@@ -49,10 +51,16 @@ async function display(document,summary,blob) {
 function showDownload(id) {
   $('download').href=`/api/library/${id}/asset`;
   $('download').hidden=false;
+  const tile=$('download-tile');
+  tile.href=`/api/library/${id}/tile`;
+  tile.setAttribute('download', `ink-stencil-${id.slice(0,12)}-tile.png`);
+  tile.hidden=false;
 }
 
 async function preview(document) {
-  $('download').hidden=true; note('正在生成校样…');
+  $('download').hidden=true;
+  $('download-tile').hidden=true;
+  note('正在生成校样…');
   const {summary,base64}=await post('/api/preview',document);
   await display(document,summary,decode(base64,metadata.asset));
   note('校样已更新');
@@ -92,5 +100,6 @@ editor.onchange=()=>{
   catch(error) {note(error.message,true);}
 };
 mountImport?.($('editor-extras'),()=>parseDocument(editor.value),document=>{setDocument(document);dirty();},message=>note(message,true));
+mountTileLab();
 $('inspection').append(el('p','等待校样','muted'));
 await task(async()=>{await loadDemo();await listVersions();});

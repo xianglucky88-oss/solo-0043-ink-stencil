@@ -6,3 +6,18 @@
 .layer-list li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:41px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
 .layer-list li:last-child{border-bottom:0}.layer-list small{display:block;color:var(--muted)}.layer-list span{font-size:10px}
 .swatch{width:18px;height:18px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px #ffffff40}
+.head-links{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.tile-lab{margin-top:16px;border:1px solid var(--line);background:var(--surface);border-radius:6px;overflow:hidden}
+.tile-lab-body{padding:15px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end}
+.tile-lab-body label{display:grid;gap:5px;color:var(--muted);font-size:12px}
+.tile-lab-body input{min-height:30px;padding:4px 7px;color:inherit;background:#25292c;border:1px solid #51595d;border-radius:5px}
+.tile-file{min-width:220px}
+#tile-lab-status{grid-column:1/-1;color:var(--muted);margin:0}
+#tile-lab-status[data-error=true]{color:#ff9d94}
+.tile-canvas-wrap{grid-column:1/-1;overflow:auto;max-height:520px;padding:18px;border:1px solid var(--line);border-radius:6px;background:#303839}
+#tile-proof-canvas{display:block;image-rendering:pixelated;background:repeating-conic-gradient(#d8dbd9 0 25%,#f4f4ee 0 50%) 50%/18px 18px;box-shadow:0 8px 30px #0005}
+#tile-proof-download{min-height:36px;display:inline-flex;align-items:center}
+.version-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center;margin-top:7px}
+.version-row .version{margin-top:0}
+.version-tile{padding:6px 8px;border:1px solid #51595d;border-radius:5px;text-decoration:none;font-size:12px;white-space:nowrap}
+.version-tile:hover{border-color:var(--accent)}

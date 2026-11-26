@@ -1,4 +1,5 @@
 import { deflateSync } from 'node:zlib';
+export { decodePNG } from './png-decode.mjs';
 
 const table=Array.from({length:256},(_,n)=>{
   for(let i=0;i<8;i++) n=(n>>>1)^((n&1)?0xedb88320:0);
