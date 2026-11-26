@@ -79,6 +79,14 @@
       ]
     },
     {
+      "id": "product-kits",
+      "path": "product/kits.mjs",
+      "role": [
+        "冻结版分幅套件",
+        "套件复取与完整性"
+      ]
+    },
+    {
       "id": "server-router",
       "path": "server/router.mjs",
       "role": [
@@ -86,7 +94,8 @@
         "冻结校样",
         "下载版本产物",
         "重启后复取",
-        "完整性复核"
+        "完整性复核",
+        "冻结版分幅套件"
       ]
     },
     {
@@ -107,20 +116,30 @@
       ]
     },
     {
+      "id": "server-kits",
+      "path": "server/kits.mjs",
+      "role": [
+        "冻结版分幅套件",
+        "套件复取与完整性"
+      ]
+    },
+    {
       "id": "server-canonical",
       "path": "server/canonical.mjs",
       "role": [
         "冻结校样",
         "下载版本产物",
         "重启后复取",
-        "完整性复核"
+        "完整性复核",
+        "冻结版分幅套件"
       ]
     },
     {
       "id": "server-atomic-write",
       "path": "server/atomic-write.mjs",
       "role": [
-        "冻结校样"
+        "冻结校样",
+        "冻结版分幅套件"
       ]
     },
     {
@@ -309,6 +328,45 @@
         "server-router",
         "server-library",
         "server-canonical"
+      ]
+    },
+    {
+      "id": "kitGeometry",
+      "name": "冻结版分幅套件",
+      "entry": "POST /api/kits 与 GET /api/kits/:id[/tiles/:n]",
+      "success": "从冻结版本按成品框、整数出血和 1/2 倍原生像素产出分幅 PNG，同规格只栅格化一次并返回同一链接",
+      "failure": "超预算或非法框拒绝；失败不发布半套且不占规格，可重试",
+      "verification": "node tools/workflow.mjs kitGeometry",
+      "steps": [
+        "校验冻结版本、成品框、出血与倍率并按整幅输出核算预算",
+        "以全局输出像素坐标原生栅格化并切成最长边不超过 512 的分片",
+        "整套内容寻址发布，同规格并发与重复请求复用同一链接"
+      ],
+      "module_ids": [
+        "product-kits",
+        "product-raster",
+        "product-png",
+        "server-router",
+        "server-kits",
+        "server-canonical",
+        "server-atomic-write"
+      ]
+    },
+    {
+      "id": "kitDedup",
+      "name": "套件复取与完整性",
+      "entry": "GET /api/kits/:id[/tiles/:n]",
+      "success": "重启或草稿变更后凭链接取回原套件，不再栅格化",
+      "failure": "篡改返回 409；不同冻结版本或任一输出条件得到不同套件",
+      "verification": "node tools/workflow.mjs kitDedup",
+      "steps": [
+        "按规格摘要定位已发布套件并核对文件与分片摘要",
+        "重启后重建规格映射并原样复取，不重新栅格化"
+      ],
+      "module_ids": [
+        "server-kits",
+        "server-canonical",
+        "server-router"
       ]
     }
   ],

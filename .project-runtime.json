@@ -48,6 +48,34 @@
     {
       "workflow_id": "integrity",
       "command": "node tools/workflow.mjs integrity"
+    },
+    {
+      "workflow_id": "kitGeometry",
+      "command": "node tools/workflow.mjs kitGeometry"
+    },
+    {
+      "workflow_id": "kitContent",
+      "command": "node tools/workflow.mjs kitContent"
+    },
+    {
+      "workflow_id": "kitNativeScale",
+      "command": "node tools/workflow.mjs kitNativeScale"
+    },
+    {
+      "workflow_id": "kitBudget",
+      "command": "node tools/workflow.mjs kitBudget"
+    },
+    {
+      "workflow_id": "kitDedup",
+      "command": "node tools/workflow.mjs kitDedup"
+    },
+    {
+      "workflow_id": "kitRetry",
+      "command": "node tools/workflow.mjs kitRetry"
+    },
+    {
+      "workflow_id": "kitIntegrity",
+      "command": "node tools/workflow.mjs kitIntegrity"
     }
   ]
 }

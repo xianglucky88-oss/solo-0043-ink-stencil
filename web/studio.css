@@ -6,3 +6,8 @@
 .layer-list li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:41px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
 .layer-list li:last-child{border-bottom:0}.layer-list small{display:block;color:var(--muted)}.layer-list span{font-size:10px}
 .swatch{width:18px;height:18px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px #ffffff40}
+.kit-list{list-style:none;margin:8px 0;padding:0}
+.kit-list li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.kit-list li:last-child{border-bottom:0}
+.kit-list a{font-size:12px}
+#kits-panel button{margin-top:10px;width:100%}

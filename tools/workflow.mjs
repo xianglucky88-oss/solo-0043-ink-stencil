@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { start } from '../server.mjs';
 import { checks } from './product-checks.mjs';
+import { kitChecks, makeRestart } from './kit-checks.mjs';
 
 const storage=await mkdtemp(join(tmpdir(),'media-workflow-'));
 let server;
@@ -25,6 +26,8 @@ try {
     assert.equal(response.status,200); assert.equal(response.headers.get('content-type'),metadata.asset);
     return Buffer.from(await response.arrayBuffer());
   };
+  const restart=makeRestart(open,close,storage);
+  const post=(path,body)=>get(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const actions={
     import:async()=>{
       assert.equal((await get('/')).status,200);
@@ -60,6 +63,7 @@ try {
       await read(await get(`/api/library/${id}/asset`),409);
     },
     ...checks({document, preview, rejected}),
+    ...kitChecks({storage, restart, get, post, read}),
   };
   const name=process.argv[2]??'proof';
   assert.ok(Object.hasOwn(actions,name),`Unknown workflow: ${name}`);

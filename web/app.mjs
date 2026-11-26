@@ -4,6 +4,7 @@ import { mountFields } from './fields.mjs';
 import { parseDocument, readFile, updateDocument } from './documents.mjs';
 import { refreshVersions } from './versions.mjs';
 import { fields, present, mountImport } from './surface.mjs';
+import { selectVersion } from './kits.mjs';
 
 const editor=$('document'), status=$('status'), stage=$('stage');
 const actions=['demo','freeze','render','import'].map($);
@@ -68,7 +69,7 @@ async function listVersions() {
   await refreshVersions($('versions'),id=>task(async()=>{
     const [record,blob]=await Promise.all([get(`/api/library/${id}`),artifact(id)]);
     await display(record.document,record.summary,blob);
-    showDownload(id); note(`冻结版本 ${id.slice(0,12)}`);
+    showDownload(id); selectVersion(id); note(`冻结版本 ${id.slice(0,12)}`);
   }));
 }
 
@@ -79,7 +80,7 @@ $('freeze').onclick=()=>task(async()=>{
   const saved=await post('/api/library',parseDocument(editor.value));
   const [record,blob]=await Promise.all([get(`/api/library/${saved.id}`),artifact(saved.id)]);
   await display(record.document,saved.summary,blob);
-  showDownload(saved.id); await listVersions(); note(`${saved.created?'已冻结':'已复用'} ${saved.id.slice(0,12)}`);
+  showDownload(saved.id); selectVersion(saved.id); await listVersions(); note(`${saved.created?'已冻结':'已复用'} ${saved.id.slice(0,12)}`);
 });
 $('import').onclick=()=>$('file').click();
 $('file').onchange=()=>task(async()=>{
