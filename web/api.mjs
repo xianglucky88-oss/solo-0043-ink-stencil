@@ -15,6 +15,12 @@ export async function post(path,document) {
   return (await checked(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(document)})).json();
 }
 
+// Send the exact source file bytes so the API applies the same raw-byte
+// budget it uses for direct uploads; never re-serialize an imported file.
+export async function postRaw(path,bytes) {
+  return (await checked(path,{method:'POST',headers:{'Content-Type':'application/json'},body:bytes})).json();
+}
+
 export async function artifact(id) {
   return (await checked(`/api/library/${id}/asset`)).blob();
 }
