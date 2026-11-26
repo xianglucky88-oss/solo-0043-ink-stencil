@@ -9,10 +9,11 @@ export function normalize(input) {
   const samples=choice(input.samples,[1,2],'每轴采样');
   const layers=unique(list(input.layers,1,16,'图层').map(row=>{
     object(row,'图层');
-    requireThat(typeof row.visible==='boolean','visible 必须是布尔值');
-    return {id:key(row.id), shape:normalizeShape(row.shape), transform:normalizeTransform(row.transform),
-      color:parseColor(row.color), opacity:number(row.opacity,0,1,'不透明度'),
-      blend:choice(row.blend,['normal','multiply','screen'],'混合'), mask:row.mask==null?null:key(row.mask,'遮罩'), visible:row.visible};
+    requireThat(row.visible===undefined || typeof row.visible==='boolean','visible 必须是布尔值');
+    return {id:key(row.id), shape:normalizeShape(row.shape),
+      transform:normalizeTransform(row.transform ?? {x:width/2,y:height/2}),
+      color:parseColor(row.color), opacity:number(row.opacity??1,0,1,'不透明度'),
+      blend:choice(row.blend??'normal',['normal','multiply','screen'],'混合'), mask:row.mask==null?null:key(row.mask,'遮罩'), visible:row.visible!==false};
   }),'图层');
   requireThat(width*height*samples*samples*layers.length<=8_000_000,'画布、采样和图层组合超出渲染预算');
   validateMaskOrder(layers);

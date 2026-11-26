@@ -1,12 +1,13 @@
 import { $, el } from './dom.mjs';
-import { artifact, decode, get, post } from './api.mjs';
+import { artifact, decode, get, post, recoverPng } from './api.mjs';
 import { mountFields } from './fields.mjs';
 import { parseDocument, readFile, updateDocument } from './documents.mjs';
 import { refreshVersions } from './versions.mjs';
 import { fields, present, mountImport } from './surface.mjs';
+import { mountLayerEditor } from './layer-editor.mjs';
 
 const editor=$('document'), status=$('status'), stage=$('stage');
-const actions=['demo','freeze','render','import'].map($);
+const actions=['demo','freeze','render','import','recover'].map($);
 let metadata,busy=false,dispose,url;
 
 function note(message,error=false) { status.value=message; status.dataset.error=String(error); }
@@ -16,6 +17,20 @@ function dirty() {
   note('工作文档已变更 · 校样待更新');
 }
 
+function commitLayerEdit(mutator) {
+  let next;
+  try {
+    next=parseDocument(editor.value);
+    mutator(next);
+  } catch(error) {
+    note(error.message,true);
+    return;
+  }
+  setDocument(next);
+  dirty();
+  void task(()=>preview(next));
+}
+
 function setDocument(document) {
   editor.value=JSON.stringify(document,null,2);
   $('document-name').textContent=document.id??'未命名';
@@ -23,17 +38,18 @@ function setDocument(document) {
     try { setDocument(updateDocument(editor.value,keys,value)); dirty(); }
     catch(error) { note(error.message,true); }
   });
+  mountLayerEditor($('layer-editor'),document,commitLayerEdit);
 }
 
 async function task(fn) {
   if(busy) return;
   busy=true; for(const action of actions) action.disabled=true;
-  editor.readOnly=true; $('controls').inert=true; $('editor-extras').inert=true;
+  editor.readOnly=true; $('controls').inert=true; $('editor-extras').inert=true; $('layer-editor').inert=true;
   try { await fn(); }
   catch(error) { note(error.message,true); }
   finally {
     busy=false; for(const action of actions) action.disabled=false;
-    editor.readOnly=false; $('controls').inert=false; $('editor-extras').inert=false;
+    editor.readOnly=false; $('controls').inert=false; $('editor-extras').inert=false; $('layer-editor').inert=false;
   }
 }
 
@@ -86,6 +102,22 @@ $('file').onchange=()=>task(async()=>{
   const file=$('file').files[0]; $('file').value='';
   if(file) await preview(await readFile(file));
 });
+
+$('recover').onclick=()=>$('png-file').click();
+$('png-file').onchange=()=>task(async()=>{
+  const file=$('png-file').files[0]; $('png-file').value='';
+  if(!file) return;
+  note(`正在恢复 ${file.name}…`);
+  // On rejection this throws before setDocument/display, so the current draft
+  // and proof stay exactly where they were.
+  const result=await recoverPng(file);
+  const blob=decode(result.base64,'image/png');
+  await display(result.document,result.summary,blob);
+  const layerText=result.recovery.layers
+    .map(item=>`${item.color}：${item.pieces} 块${item.holes?`/${item.holes} 孔`:''}`).join('；');
+  note(`已从 PNG 恢复矢量工作稿（${result.recovery.width}×${result.recovery.height}，${layerText}）`);
+});
+
 editor.oninput=dirty;
 editor.onchange=()=>{
   try {setDocument(parseDocument(editor.value));}

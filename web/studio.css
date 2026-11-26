@@ -6,3 +6,21 @@
 .layer-list li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:41px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
 .layer-list li:last-child{border-bottom:0}.layer-list small{display:block;color:var(--muted)}.layer-list span{font-size:10px}
 .swatch{width:18px;height:18px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px #ffffff40}
+.layer-head{min-height:38px}
+#layer-editor{padding:10px 15px 13px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.layer-card{border:1px solid var(--line);border-radius:7px;padding:9px 10px;margin:0;min-width:0;background:#171a1c}
+.layer-card[data-layer-id]{scroll-margin:80px}
+.layer-card-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.layer-id{flex:1;min-width:0;min-height:28px;padding:3px 7px;font-size:12px}
+.check{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:12px;white-space:nowrap}
+.check input{accent-color:var(--accent)}
+.order-buttons{display:flex;gap:4px}
+.order{min-height:28px;width:30px;padding:0;line-height:1}
+.layer-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 9px}
+.mini-field{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);min-width:0}
+.mini-field input,.mini-field select{min-height:27px;padding:3px 6px;min-width:0;width:100%}
+.mini-field input[type=color]{padding:1px;height:27px;cursor:pointer}
+.color-row{display:flex;gap:5px;align-items:center}
+.color-row .hex{flex:1;min-width:0;font-size:11px}
+.piece-meta{margin-top:8px;font-size:11px;line-height:1.5;color:var(--accent);overflow-wrap:anywhere}
+#png-file{display:none}

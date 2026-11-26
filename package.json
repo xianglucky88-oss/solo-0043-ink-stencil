@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node server/boot.mjs",
     "check": "node tools/check.mjs",
-    "demo": "node tools/workflow.mjs"
+    "demo": "node tools/workflow.mjs",
+    "recover": "node tools/workflow.mjs recover"
   }
 }

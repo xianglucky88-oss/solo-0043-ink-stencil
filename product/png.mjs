@@ -25,3 +25,7 @@ export function png(width,height,pixels) {
   for(let y=0;y<height;y++) pixels.copy(raw,y*(stride+1)+1,y*stride,(y+1)*stride);
   return Buffer.concat([Buffer.from('89504e470d0a1a0a','hex'),chunk('IHDR',header),chunk('IDAT',deflateSync(raw)),chunk('IEND',Buffer.alloc(0))]);
 }
+
+// Reading/validation lives in png-read.mjs; re-exported here because PNG I/O
+// is the natural module consumers import from.
+export { decodePng, readPng, readChunks, evaluateColorSpace } from './png-read.mjs';

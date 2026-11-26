@@ -3,6 +3,10 @@ import { el } from './dom.mjs';
 export async function probe(url,panel) {
   const image=new Image();image.src=url;await image.decode();
   const canvas=el('canvas',undefined,'raster');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+  // Recovered marks can be as small as 16 px; show them at an integer zoom
+  // while the backing store stays 1:1 so pixel reads remain exact.
+  const zoom=Math.max(1,Math.min(16,Math.floor(420/Math.max(canvas.width,canvas.height))));
+  if(zoom>1) canvas.style.width=`${canvas.width*zoom}px`;
   canvas.tabIndex=0;canvas.setAttribute('aria-label','像素取样画布');
   const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
   const output=el('output','', 'mono');

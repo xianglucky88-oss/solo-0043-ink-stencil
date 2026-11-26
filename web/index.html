@@ -14,9 +14,11 @@
     <div class="brand"><span class="mark" aria-hidden="true"></span><h1>墨版</h1><span class="tag">矢量遮罩合成校样</span></div>
     <div class="tools">
       <button id="demo" type="button">样例</button>
+      <button id="recover" type="button" class="accent" title="把旧徽记 PNG 恢复成可编辑的矢量工作稿">导入 PNG 恢复</button>
+      <input id="png-file" type="file" accept="image/png,.png" hidden>
       <button id="import" type="button" title="导入工作文档">导入 JSON</button><input id="file" type="file" accept=".json,application/json" hidden>
       <button id="render" type="button">更新校样</button>
-      <button id="freeze" class="accent" type="button">冻结版本</button>
+      <button id="freeze" type="button">冻结版本</button>
     </div>
   </header>
   <main>
@@ -32,6 +34,8 @@
       <aside class="inspector" aria-label="编辑与检查">
         <div class="panel-head"><h3>参数</h3></div>
         <div id="controls"></div>
+        <div class="panel-head layer-head"><h3>图层编辑</h3></div>
+        <div id="layer-editor"></div>
         <div id="inspection"></div>
         <details class="details"><summary>源文档</summary><div id="editor-extras"></div><textarea id="document" aria-label="JSON 工作文档" wrap="off" spellcheck="false"></textarea></details>
         <details class="details" open><summary>冻结版本</summary><div id="versions"></div></details>

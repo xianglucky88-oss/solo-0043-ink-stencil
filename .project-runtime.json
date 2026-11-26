@@ -48,6 +48,10 @@
     {
       "workflow_id": "integrity",
       "command": "node tools/workflow.mjs integrity"
+    },
+    {
+      "workflow_id": "recover",
+      "command": "node tools/workflow.mjs recover"
     }
   ]
 }

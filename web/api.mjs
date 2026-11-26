@@ -15,6 +15,16 @@ export async function post(path,document) {
   return (await checked(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(document)})).json();
 }
 
+export async function recoverPng(file) {
+  const buffer=await file.arrayBuffer();
+  const response=await checked('/api/recover',{
+    method:'POST',
+    headers:{'Content-Type':file.type==='image/png'?'image/png':'application/octet-stream'},
+    body:buffer,
+  });
+  return response.json();
+}
+
 export async function artifact(id) {
   return (await checked(`/api/library/${id}/asset`)).blob();
 }
