@@ -14,3 +14,18 @@ export function over(pixel, color, alpha, mode) {
   }
   pixel[3]=alpha+baseAlpha*(1-alpha);
 }
+
+// Composite a rendered isolation-group buffer (premultiplied RGBA) onto an
+// outer accumulator. The group's own opacity scales the buffer exactly once,
+// after every layer inside the group has been composited.
+export function overGroup(pixel, group, groupOpacity, mode) {
+  const sourceAlpha = group[3];
+  if (sourceAlpha === 0 || groupOpacity === 0) return;
+  const alpha = sourceAlpha * groupOpacity;
+  const color = [
+    group[0] / sourceAlpha,
+    group[1] / sourceAlpha,
+    group[2] / sourceAlpha,
+  ];
+  over(pixel, color, alpha, mode);
+}

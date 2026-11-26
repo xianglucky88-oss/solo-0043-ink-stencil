@@ -17,5 +17,5 @@ export async function present({stage,inspect,summary,document,url}) {
   transport.append(toggle,sample);stage.append(transport,metrics([
     ['像素尺寸',`${summary.width} × ${summary.height}`],['非透明像素',summary.painted.toLocaleString()],['半透明像素',summary.partial.toLocaleString()],
   ]));
-  inspect.append(el('h4','图层堆栈'),layerList(document.layers,summary.layers));
+  inspect.append(el('h4','图层堆栈'),layerList(document.layers,summary.layers,document.groups));
 }
