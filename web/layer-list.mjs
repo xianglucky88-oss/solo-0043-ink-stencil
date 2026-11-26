@@ -7,7 +7,7 @@ export function layerList(layers,rendered) {
     const canvas=el('canvas');canvas.width=18;canvas.height=18;
     const ctx=canvas.getContext('2d');ctx.fillStyle=layer.color;ctx.fillRect(0,0,18,18);chip.append(canvas);
     label.append(el('strong',layer.id),el('small',`${layer.blend}${layer.mask?` · 遮罩 ${layer.mask}`:''}`));
-    row.append(chip,label,el('span',layer.visible?`${rendered[i].hits.toLocaleString()} 样本`:'仅遮罩','muted mono'));
+    row.append(chip,label,el('span',layer.visible?`${(rendered?.[i]?.hits??0).toLocaleString()} 样本`:'仅遮罩','muted mono'));
     list.append(row);
   }
   return list;

@@ -79,6 +79,23 @@
       ]
     },
     {
+      "id": "product-animation",
+      "path": "product/animation.mjs",
+      "role": [
+        "循环揭幕帧安排",
+        "任意顺序帧校样",
+        "整段循环预算"
+      ]
+    },
+    {
+      "id": "product-apng",
+      "path": "product/apng.mjs",
+      "role": [
+        "透明循环 APNG 导出",
+        "文件时序编码"
+      ]
+    },
+    {
       "id": "server-router",
       "path": "server/router.mjs",
       "role": [
@@ -220,6 +237,27 @@
         "product-masks",
         "product-raster",
         "product-png"
+      ]
+    },
+    {
+      "id": "animation",
+      "name": "循环揭幕帧校样与透明 APNG",
+      "entry": "POST /api/preview 的 frame 与 POST /api/apng",
+      "success": "任意顺序选帧结果一致；APNG 按 120/250/130 ms 循环，解码画面逐帧一致且透明",
+      "failure": "未知图层、非法帧安排或整段预算超限拒绝且不产出部分动图",
+      "verification": "node tools/workflow.mjs animation",
+      "steps": [
+        "规范化并折叠帧安排",
+        "按帧几何与子样点重新栅格化",
+        "编码全画布 SOURCE 帧与 fcTL 时序",
+        "校验整段循环预算与引用"
+      ],
+      "module_ids": [
+        "product-animation",
+        "product-apng",
+        "product-document",
+        "product-raster",
+        "server-router"
       ]
     },
     {

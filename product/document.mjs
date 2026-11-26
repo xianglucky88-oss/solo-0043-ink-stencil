@@ -3,6 +3,7 @@ import { normalizeShape } from './shapes.mjs';
 import { normalizeTransform } from './transform.mjs';
 import { parseColor } from './color.mjs';
 import { validateMaskOrder } from './masks.mjs';
+import { extractScheduleInput, normalizeSchedule } from './animation.mjs';
 
 export function normalize(input) {
   const width=number(input.width,16,512,'像素宽',true), height=number(input.height,16,512,'像素高',true);
@@ -16,5 +17,12 @@ export function normalize(input) {
   }),'图层');
   requireThat(width*height*samples*samples*layers.length<=8_000_000,'画布、采样和图层组合超出渲染预算');
   validateMaskOrder(layers);
-  return {id:key(input.id), width,height,samples,layers};
+  const document={id:key(input.id), width,height,samples,layers};
+  // A working draft may carry a frame arrangement. Its full-loop budget and
+  // layer references are validated up front; ordinary drafts have no schedule.
+  const scheduleInput=extractScheduleInput(input);
+  if(scheduleInput) {
+    document.animation=normalizeSchedule(input,{width,height,samples,layers,layerCount:layers.length});
+  }
+  return document;
 }

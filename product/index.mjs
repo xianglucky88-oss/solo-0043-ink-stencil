@@ -2,7 +2,9 @@ import { raster } from './raster.mjs';
 import { png } from './png.mjs';
 export { metadata } from './config.mjs';
 export { normalize } from './document.mjs';
-export { demo } from './demo.mjs';
+export { demo, revealDemo } from './demo.mjs';
+export * from './animation.mjs';
+export * from './apng.mjs';
 
 export function render(document) {
   const { id,width,height,samples }=document;

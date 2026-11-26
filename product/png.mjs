@@ -5,7 +5,7 @@ const table=Array.from({length:256},(_,n)=>{
   return n>>>0;
 });
 
-function chunk(tag, body) {
+export function pngChunk(tag, body) {
   const block=Buffer.alloc(12+body.length);
   block.writeUInt32BE(body.length);
   block.write(tag,4,'ascii');
@@ -16,12 +16,22 @@ function chunk(tag, body) {
   return block;
 }
 
+// Backwards-compatible private name used inside this module.
+const chunk=pngChunk;
+
+// Prepends a filter-byte (0 = None) to every scanline. The returned buffer is
+// the raw layout handed to zlib and shared by PNG and APNG frame encoding.
+export function scanlineBytes(width,height,pixels) {
+  const stride=width*4, raw=Buffer.alloc(height*(stride+1));
+  for(let y=0;y<height;y++) pixels.copy(raw,y*(stride+1)+1,y*stride,(y+1)*stride);
+  return raw;
+}
+
 export function png(width,height,pixels) {
   const header=Buffer.alloc(13);
   header.writeUInt32BE(width);
   header.writeUInt32BE(height,4);
   header[8]=8; header[9]=6;
-  const stride=width*4, raw=Buffer.alloc(height*(stride+1));
-  for(let y=0;y<height;y++) pixels.copy(raw,y*(stride+1)+1,y*stride,(y+1)*stride);
+  const raw=scanlineBytes(width,height,pixels);
   return Buffer.concat([Buffer.from('89504e470d0a1a0a','hex'),chunk('IHDR',header),chunk('IDAT',deflateSync(raw)),chunk('IEND',Buffer.alloc(0))]);
 }

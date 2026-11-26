@@ -19,6 +19,12 @@ npm start
 可以导入 JSON，或者在「源文档」区域编辑。获取可导入样例：`curl -s http://127.0.0.1:8742/api/demo | node -e 'process.stdin.on("data",c=>s+=c).on("end",()=>console.log(JSON.stringify(JSON.parse(s).document,null,2)));let s=""'`。
 更新校样只计算不落盘；冻结会写入版本库，下载原始 `.png` 资产。可在「冻结版本」中复取已保存版本。
 
+## 循环揭幕与 APNG
+
+工作稿可附带帧安排（首帧 `at:0`，其后为严格递增的整数毫秒起点，`end` 为大于末帧起点且 ≤10000 的循环终点）。每帧可稀疏覆盖指定图层的位置 `x/y` 与 `opacity`，未填项逐字段继承上一帧、首帧继承工作稿原值。
+
+载入「揭幕样例」后，可直接点选任意一帧单独校样（无需按顺序看帧，重复选同一帧结果一致），或点「导出透明 APNG」取得可直接放上网页、无限循环的透明动图；导出不写入冻结版本，也不改变普通校样、冻结和原 PNG 下载。接口与预算口径见 [项目规格](PROJECT_SPEC.md)。
+
 ## 检查
 
 `npm run check` 检查所有 JavaScript 模块语法，`npm run demo` 通过本机 HTTP 服务演练核心产物。完整测试套件暂缓；[项目规格](PROJECT_SPEC.md)列出全部生产工作流检查和输入边界。

@@ -30,6 +30,10 @@
       "command": "node tools/workflow.mjs sampling"
     },
     {
+      "workflow_id": "animation",
+      "command": "node tools/workflow.mjs animation"
+    },
+    {
       "workflow_id": "import",
       "command": "node tools/workflow.mjs import"
     },

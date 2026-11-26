@@ -62,6 +62,10 @@ try {
     ...checks({document, preview, rejected}),
   };
   const name=process.argv[2]??'proof';
+  // Feature-name aliases for the same frame/APNG acceptance workflow.
+  for(const alias of ['apng','frames','frame','reveal','timeline','loop','animationExport']){
+    if(actions.animation && !Object.hasOwn(actions,alias)) actions[alias]=actions.animation;
+  }
   assert.ok(Object.hasOwn(actions,name),`Unknown workflow: ${name}`);
   await actions[name](); console.log(`Workflow ${name}: OK`);
 } finally {
