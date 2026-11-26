@@ -26,13 +26,31 @@
     </div>
     <div class="workspace">
       <section class="stage" aria-labelledby="stage-title">
-        <div class="panel-head"><h3 id="stage-title">校样</h3><a id="download" hidden download>下载产物</a></div>
+        <div class="panel-head"><h3 id="stage-title">校样</h3><span class="asset-links"><a id="download" hidden download>下载冻结 PNG</a><a id="mark-download" hidden download>导出徽记素材</a></span></div>
         <div id="stage"></div>
       </section>
       <aside class="inspector" aria-label="编辑与检查">
         <div class="panel-head"><h3>参数</h3></div>
         <div id="controls"></div>
         <div id="inspection"></div>
+        <section class="details" aria-labelledby="composite-title">
+          <h4 id="composite-title">本地换底合成</h4>
+          <p class="muted">底图在本机传入并合成，不连接墨版服务。需与冻结画布同尺寸的 8 位 RGBA PNG；尺寸不符不出图。</p>
+          <div class="composite-row">
+            <label class="file-button">选择徽记素材 (.inkmark)
+              <input id="mark-file" type="file" accept=".inkmark,application/x-ink-mark" hidden>
+            </label>
+            <span id="mark-source" class="mono muted">使用当前冻结稿素材</span>
+          </div>
+          <div class="composite-row">
+            <label class="file-button">选择底图 PNG
+              <input id="backdrop-file" type="file" accept=".png,image/png" hidden>
+            </label>
+          </div>
+          <output id="composite-status" class="mono muted" role="status" aria-live="polite">等待底图</output>
+          <div id="composite-result"></div>
+          <a id="composite-download" class="file-button" hidden download="inkmark-composite.png">下载合成 PNG</a>
+        </section>
         <details class="details"><summary>源文档</summary><div id="editor-extras"></div><textarea id="document" aria-label="JSON 工作文档" wrap="off" spellcheck="false"></textarea></details>
         <details class="details" open><summary>冻结版本</summary><div id="versions"></div></details>
       </aside>

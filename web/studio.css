@@ -6,3 +6,12 @@
 .layer-list li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:41px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
 .layer-list li:last-child{border-bottom:0}.layer-list small{display:block;color:var(--muted)}.layer-list span{font-size:10px}
 .swatch{width:18px;height:18px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px #ffffff40}
+.asset-links{display:flex;gap:14px;flex-wrap:wrap}
+.composite-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:9px 0}
+.file-button{display:inline-flex;align-items:center;min-height:34px;padding:6px 11px;border:1px solid #51595d;border-radius:5px;background:#25292c;color:var(--accent);cursor:pointer;font-size:13px}
+.file-button:hover{border-color:var(--accent)}
+#composite-status{display:block;margin:8px 0;overflow-wrap:anywhere}
+#composite-status[data-error=true]{color:#ff9d94}
+#composite-result{margin:10px 0}
+#composite-result .raster{max-height:260px}
+#composite-download{text-decoration:none;margin-top:4px}

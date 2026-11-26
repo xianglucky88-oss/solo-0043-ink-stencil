@@ -4,15 +4,19 @@ import { mountFields } from './fields.mjs';
 import { parseDocument, readFile, updateDocument } from './documents.mjs';
 import { refreshVersions } from './versions.mjs';
 import { fields, present, mountImport } from './surface.mjs';
+import { setFrozenMark, clearFrozenMark } from './mark-composite-ui.mjs';
 
 const editor=$('document'), status=$('status'), stage=$('stage');
 const actions=['demo','freeze','render','import'].map($);
-let metadata,busy=false,dispose,url;
+let metadata,busy=false,dispose,url,currentId=null;
 
 function note(message,error=false) { status.value=message; status.dataset.error=String(error); }
 
 function dirty() {
   $('download').hidden=true;
+  $('mark-download').hidden=true;
+  currentId=null;
+  clearFrozenMark();
   note('工作文档已变更 · 校样待更新');
 }
 
@@ -46,13 +50,23 @@ async function display(document,summary,blob) {
   dispose=await present({stage,inspect:$('inspection'),summary,document,blob,url});
 }
 
-function showDownload(id) {
+async function showDownload(id) {
   $('download').href=`/api/library/${id}/asset`;
   $('download').hidden=false;
+  $('mark-download').href=`/api/library/${id}/mark`;
+  $('mark-download').hidden=false;
+  currentId=id;
+  const response=await fetch(`/api/library/${id}/mark`);
+  if(!response.ok) throw new Error('徽记素材读取失败');
+  setFrozenMark(new Uint8Array(await response.arrayBuffer()), id);
 }
 
 async function preview(document) {
-  $('download').hidden=true; note('正在生成校样…');
+  $('download').hidden=true;
+  $('mark-download').hidden=true;
+  currentId=null;
+  clearFrozenMark();
+  note('正在生成校样…');
   const {summary,base64}=await post('/api/preview',document);
   await display(document,summary,decode(base64,metadata.asset));
   note('校样已更新');

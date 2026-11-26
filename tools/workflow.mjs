@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { start } from '../server.mjs';
 import { checks } from './product-checks.mjs';
+import { markChecks } from './mark-checks.mjs';
 
 const storage=await mkdtemp(join(tmpdir(),'media-workflow-'));
 let server;
@@ -60,6 +61,7 @@ try {
       await read(await get(`/api/library/${id}/asset`),409);
     },
     ...checks({document, preview, rejected}),
+    ...markChecks({document, save, get}),
   };
   const name=process.argv[2]??'proof';
   assert.ok(Object.hasOwn(actions,name),`Unknown workflow: ${name}`);

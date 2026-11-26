@@ -23,7 +23,10 @@ export async function openLibrary(directory, metadata) {
   return {
     load,
     async keep(document, rendered) {
-      const raw = canonical({ version: metadata.version, document, summary: rendered.summary, base64: rendered.bytes.toString('base64') });
+      const raw = canonical({
+        version: metadata.version, document, summary: rendered.summary,
+        base64: rendered.bytes.toString('base64'), markBase64: rendered.mark.toString('base64'),
+      });
       const id = digest(raw);
       const created = await publishFile(file(id), raw);
       if (!created) await load(id);

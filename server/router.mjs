@@ -4,7 +4,7 @@ import { servePage } from './static.mjs';
 import { InputError } from './input.mjs';
 
 export function makeRouter(product, library) {
-  const { metadata, demo, render, normalize } = product;
+  const { metadata, demo, render, normalize, MARK_TYPE, MARK_SUFFIX } = product;
   return async function route(req, res) {
     const { pathname } = new URL(req.url, 'http://localhost');
     const method = req.method;
@@ -20,12 +20,20 @@ export function makeRouter(product, library) {
       const saved = await library.keep(document, rendered);
       return json(res, saved, saved.created ? 201 : 200);
     }
-    const match = /^\/api\/library\/([a-f0-9]{64})(?:\/(asset))?$/.exec(pathname);
+    const match = /^\/api\/library\/([a-f0-9]{64})(?:\/(asset|mark))?$/.exec(pathname);
     if (method === 'GET' && match) {
-      const { base64, ...record } = await library.load(match[1]);
+      const { base64, markBase64, ...record } = await library.load(match[1]);
       if (!match[2]) return json(res, record);
-      return send(res, 200, Buffer.from(base64, 'base64'), metadata.asset, {
-        'Content-Disposition': `attachment; filename="${metadata.slug}-${match[1].slice(0,12)}.${metadata.suffix}"`,
+      if (match[2] === 'asset') {
+        return send(res, 200, Buffer.from(base64, 'base64'), metadata.asset, {
+          'Content-Disposition': `attachment; filename="${metadata.slug}-${match[1].slice(0,12)}.${metadata.suffix}"`,
+        });
+      }
+      // Records frozen before the mark feature carry no material; fail loudly
+      // instead of serving an empty file.
+      if (!markBase64) throw new InputError('该冻结版本不含徽记素材', 404);
+      return send(res, 200, Buffer.from(markBase64, 'base64'), MARK_TYPE, {
+        'Content-Disposition': `attachment; filename="${metadata.slug}-${match[1].slice(0,12)}.${MARK_SUFFIX}"`,
       });
     }
     throw new InputError('接口不存在', 404);
