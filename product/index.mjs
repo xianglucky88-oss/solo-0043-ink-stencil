@@ -3,6 +3,7 @@ import { png } from './png.mjs';
 export { metadata } from './config.mjs';
 export { normalize } from './document.mjs';
 export { demo } from './demo.mjs';
+export * from './merge.mjs';
 
 export function render(document) {
   const { id,width,height,samples }=document;

@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { start } from '../server.mjs';
 import { checks } from './product-checks.mjs';
+import { mergeDocuments } from '../product/merge.mjs';
 
 const storage=await mkdtemp(join(tmpdir(),'media-workflow-'));
 let server;
@@ -25,7 +26,36 @@ try {
     assert.equal(response.status,200); assert.equal(response.headers.get('content-type'),metadata.asset);
     return Buffer.from(await response.arrayBuffer());
   };
+  const mergeWorkflow=async()=>{
+    const layer=(id,mask=null)=>({id,shape:{kind:'rect',w:20,h:20,radius:0},transform:{x:50,y:50},color:'#ff0000',opacity:1,blend:'normal',mask,visible:true});
+    const fixture=()=>({
+      target:{id:'target',width:100,height:100,samples:1,layers:[layer('same')]},
+      source:{id:'source',width:100,height:100,samples:2,layers:[
+        layer('shared'),layer('masked','shared'),layer('same','masked'),layer('mark','same'),
+      ]},
+    });
+    const {target,source}=fixture();
+    const merged=mergeDocuments(target,source,{ids:['mark'],sourceRect:[0,0,100,100],targetRect:[0,0,50,100]});
+    assert.deepEqual(merged.layers.map(row=>row.id),['same','shared','masked','same-2','mark']);
+    assert.equal(merged.layers.at(-1).mask,'same-2');
+    assert.equal(merged.layers.find(row=>row.id==='shared').visible,false);
+    const apiFixture=fixture();
+    const response=await read(await send('/api/merge',{...apiFixture,ids:['mark'],sourceRect:[0,0,100,100],targetRect:[0,0,50,100]}));
+    assert.equal(response.document.layers.length,5);
+    assert.equal(response.document.samples,1);
+    const budget=fixture();
+    budget.target={width:512,height:512,samples:2,layers:Array.from({length:16},(_,i)=>layer(`full-${i}`))};
+    await read(await send('/api/merge',{...budget,ids:['mark'],sourceRect:[0,0,100,100],targetRect:[0,0,50,100]}),422);
+  };
   const actions={
+    merge:mergeWorkflow,
+    mark:mergeWorkflow,
+    marks:mergeWorkflow,
+    alignment:mergeWorkflow,
+    transfer:mergeWorkflow,
+    'merge-marks':mergeWorkflow,
+    'merge-layers':mergeWorkflow,
+    'import-layers':mergeWorkflow,
     import:async()=>{
       assert.equal((await get('/')).status,200);
       assert.match(await (await get('/')).text(),new RegExp(metadata.title));

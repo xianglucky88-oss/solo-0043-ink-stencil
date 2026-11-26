@@ -8,6 +8,8 @@
 ## 业务和数据规则
 
 - `width,height` 为 16–512 px，`samples` 为 1 或 2，最多 16 层。`width × height × samples² × layers` 不超过 8,000,000。
+- 对位合入使用两个仅用于坐标映射的画布内矩形；源框四边线性映射到目标框四边，不新增裁切框。合入变换可保存为六系数行主序仿射 `transform.affine`/`transform.matrix`，因此非均匀缩放叠加旋转后允许出现斜切，渲染器不得将其重新正交化。目标稿的 `samples` 不变，也不拉伸任何栅格 PNG。
+- 合入所选图层时递归携带其 `mask` 前序依赖；共享依赖只复制一次，未被显式选择而仅作为遮罩依赖的图层置为 `visible:false`。ID 冲突时重命名带入层并重写其引用，目标稿原 ID 与遮罩关系保持不变。合入层追加在目标稿现有层之上，带入层之间保持源稿层序。超层数或渲染预算时整个合入失败且目标工作稿不变。
 - `layers` 从底到顶排列。轮廓为 `ellipse`、`rect`（支持半径 `radius`）或 `diamond`。局部原点在形状中心；`transform` 先沿 X/Y 缩放、再旋转（屏幕坐标下正角顺时针）、最后移动中心。
 - `mask` 为空或指向前序层唯一 ID；对每个子样点，沿前序链取几何交集，遮罩不读取颜色、`visible` 或透明度。隐藏层仅用于几何判定，不绘制。
 - 颜色为 `#RRGGBB` 或 `#RRGGBBAA`，`opacity` 与颜色 alpha 相乘。`normal`、`multiply`、`screen` 在输入编码的 RGB 数值空间按 source-over 合成。采样后平均预乘值，再还原到直通 alpha RGBA PNG；完全透明的像素编码为零。
@@ -23,6 +25,7 @@
 | 透明度与混色 | `POST /api/preview 的 blend` | 正常、乘色和滤色按图层顺序合成 | 未知色值或混合模式拒绝 | `node tools/workflow.mjs blend` |
 | 边缘子像素 | `POST /api/preview 的 samples` | 网格子样点先合成后求平均，输出保留边缘透明度 | 超过预算拒绝 | `node tools/workflow.mjs sampling` |
 | 导入文档 | `POST /api/preview` | 规范输入进入校样计算 | 非法 UTF-8、JSON 或字段直接拒绝；不覆盖已有冻结资产 | `node tools/workflow.mjs import` |
+| 对位合入图层 | `product/merge.mjs` 与 `POST /api/merge` | 保留遮罩依赖、引用改名、斜切仿射和目标采样；合入层位于现有层之上 | 缺层、框越界、超 16 层或渲染预算时不改动目标稿 | 纯模块断言或临时路由演练 |
 | 冻结校样 | `POST /api/library` | 相同规范输入与产物复用同一摘要；并行提交只创建一次 | 无法规范化的草稿不会签发 | `node tools/workflow.mjs freeze` |
 | 下载版本产物 | `GET /api/library/:id/asset` | 返回冻结资产原始字节、正确媒体类型和文件名 | 不存在的资产返回 404 | `node tools/workflow.mjs download` |
 | 重启后复取 | `GET /api/library 与 GET /api/library/:id` | 恢复已有规范文档及成品校样摘要 | 未知或无法读取的版本不会替换当前校样 | `node tools/workflow.mjs reopen` |

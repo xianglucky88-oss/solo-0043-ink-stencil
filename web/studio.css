@@ -6,3 +6,30 @@
 .layer-list li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:41px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
 .layer-list li:last-child{border-bottom:0}.layer-list small{display:block;color:var(--muted)}.layer-list span{font-size:10px}
 .swatch{width:18px;height:18px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px #ffffff40}
+.merge-picker,.rect-fields{border:1px solid var(--line);border-radius:5px;padding:8px;margin:10px 0;min-width:0}
+.merge-picker legend,.rect-fields legend{padding:0 5px;color:var(--muted);font-size:12px}
+.merge-checks{display:grid;gap:5px;max-height:170px;overflow:auto}
+.merge-layer-option{display:grid;grid-template-columns:18px minmax(0,1fr);gap:7px;align-items:start;cursor:pointer}
+.merge-layer-option input{margin-top:3px}
+.merge-layer-option strong,.merge-layer-option small{display:block;overflow-wrap:anywhere}
+.merge-layer-option small{color:var(--muted)}
+#merge-source-document{min-height:110px}
+#merge-ids{width:100%;min-height:32px;padding:5px 8px;margin-bottom:10px}
+.merge-rects{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rect-fields label{display:grid;grid-template-columns:20px 1fr;gap:5px;align-items:center;margin:5px 0;color:var(--muted);font-size:12px}
+.rect-fields input{min-width:0;width:100%;min-height:28px;padding:3px 5px}
+.merge-rect-actions{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 10px}
+.merge-rect-actions button{min-height:30px;padding:4px 9px;font-size:12px}
+.merge-actions{display:flex;gap:8px;flex-wrap:wrap}
+.merge-note{min-height:20px;margin-top:8px}
+.merge-note[data-error=true]{color:#ff9d94}
+.layer-editor{display:grid;gap:9px;margin-top:8px}
+.layer-edit-row{border:1px solid var(--line);border-radius:5px;padding:7px 8px;min-width:0}
+.layer-edit-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px}
+.layer-edit-head strong{overflow-wrap:anywhere;font-size:12px}
+.layer-edit-head output{font-size:11px;color:var(--muted)}
+.layer-opacity-number{width:58px;min-height:26px;padding:2px 5px;font-size:12px}
+.layer-edit-controls{display:grid;grid-template-columns:38px minmax(0,1fr);gap:9px;align-items:center}
+.layer-edit-controls input[type=color]{width:38px;height:28px;padding:2px;border-radius:4px;background:#25292c}
+.layer-edit-controls input[type=range]{width:100%;accent-color:var(--accent)}
+@media(max-width:410px){.merge-rects{grid-template-columns:1fr}}

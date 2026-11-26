@@ -4,6 +4,8 @@ import { normalizeTransform } from './transform.mjs';
 import { parseColor } from './color.mjs';
 import { validateMaskOrder } from './masks.mjs';
 
+export * from './merge.mjs';
+
 export function normalize(input) {
   const width=number(input.width,16,512,'像素宽',true), height=number(input.height,16,512,'像素高',true);
   const samples=choice(input.samples,[1,2],'每轴采样');

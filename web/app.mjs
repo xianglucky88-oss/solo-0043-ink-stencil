@@ -23,6 +23,7 @@ function setDocument(document) {
     try { setDocument(updateDocument(editor.value,keys,value)); dirty(); }
     catch(error) { note(error.message,true); }
   });
+  editor.dispatchEvent(new CustomEvent('ink:document-changed',{detail:{document},bubbles:true}));
 }
 
 async function task(fn) {
@@ -43,7 +44,15 @@ async function display(document,summary,blob) {
   url=URL.createObjectURL(blob);
   setDocument(document);
   stage.replaceChildren(); $('inspection').replaceChildren();
-  dispose=await present({stage,inspect:$('inspection'),summary,document,blob,url});
+  dispose=await present({stage,inspect:$('inspection'),summary,document,blob,url,onLayerChange:(id,patch)=>{
+    try {
+      const next=parseDocument(editor.value);
+      const layer=next.layers?.find(row=>row.id===id);
+      if(!layer) throw new Error(`找不到图层 ${id}`);
+      Object.assign(layer,patch);
+      setDocument(next); dirty();
+    } catch(error) { note(error.message,true); }
+  }});
 }
 
 function showDownload(id) {
@@ -91,6 +100,12 @@ editor.onchange=()=>{
   try {setDocument(parseDocument(editor.value));}
   catch(error) {note(error.message,true);}
 };
-mountImport?.($('editor-extras'),()=>parseDocument(editor.value),document=>{setDocument(document);dirty();},message=>note(message,true));
+mountImport?.(
+  $('editor-extras'),
+  ()=>parseDocument(editor.value),
+  document=>{setDocument(document);dirty();},
+  message=>note(message,true),
+  document=>task(()=>preview(document)),
+);
 $('inspection').append(el('p','等待校样','muted'));
 await task(async()=>{await loadDemo();await listVersions();});

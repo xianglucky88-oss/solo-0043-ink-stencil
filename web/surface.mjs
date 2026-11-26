@@ -1,11 +1,12 @@
 import { el, metrics } from './dom.mjs';
 import { probe } from './pixel-probe.mjs';
 import { layerList } from './layer-list.mjs';
+import { layerEditor } from './layer-editor.mjs';
 
-export const mountImport=null;
+export { mountImport } from './mark-import-ui.mjs';
 export const fields=[['输出宽度','width','number',[16,512,1]],['输出高度','height','number',[16,512,1]],['像素采样','samples','number',[1,2,1]]];
 
-export async function present({stage,inspect,summary,document,url}) {
+export async function present({stage,inspect,summary,document,url,onLayerChange}) {
   const mat=el('div',undefined,'proof-mat'), transport=el('div',undefined,'transport'), toggle=el('button','深色底');
   stage.append(mat);
   const sample=await probe(url,mat);
@@ -18,4 +19,5 @@ export async function present({stage,inspect,summary,document,url}) {
     ['像素尺寸',`${summary.width} × ${summary.height}`],['非透明像素',summary.painted.toLocaleString()],['半透明像素',summary.partial.toLocaleString()],
   ]));
   inspect.append(el('h4','图层堆栈'),layerList(document.layers,summary.layers));
+  if(onLayerChange) inspect.append(el('h4','逐层颜色 / 不透明度'),layerEditor(document.layers,onLayerChange));
 }
