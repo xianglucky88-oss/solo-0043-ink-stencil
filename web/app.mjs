@@ -7,12 +7,14 @@ import { fields, present, mountImport } from './surface.mjs';
 
 const editor=$('document'), status=$('status'), stage=$('stage');
 const actions=['demo','freeze','render','import'].map($);
-let metadata,busy=false,dispose,url;
+let metadata,busy=false,url,frozenId=null;
 
 function note(message,error=false) { status.value=message; status.dataset.error=String(error); }
 
 function dirty() {
   $('download').hidden=true;
+  $('download-outline').hidden=true;
+  frozenId=null;
   note('工作文档已变更 · 校样待更新');
 }
 
@@ -37,22 +39,27 @@ async function task(fn) {
   }
 }
 
-async function display(document,summary,blob) {
-  dispose?.();
+async function display(document,summary,blob,id=null) {
   if(url) URL.revokeObjectURL(url);
   url=URL.createObjectURL(blob);
+  frozenId=id;
   setDocument(document);
-  stage.replaceChildren(); $('inspection').replaceChildren();
-  dispose=await present({stage,inspect:$('inspection'),summary,document,blob,url});
+  stage.replaceChildren(); $('inspection').replaceChildren(); $('outline-panel').replaceChildren();
+  // 轮廓素材与彩色校样同源于当前规范文档，离线后该素材即可独立使用。
+  const previewOutline=await post('/api/outline',document);
+  await present({stage,inspect:$('inspection'),outlineHost:$('outline-panel'),summary,document,blob,url,previewOutline,frozenId:id});
 }
 
-function showDownload(id) {
+function showDownloads(id) {
   $('download').href=`/api/library/${id}/asset`;
   $('download').hidden=false;
+  $('download-outline').href=`/api/library/${id}/outline`;
+  $('download-outline').hidden=false;
 }
 
 async function preview(document) {
-  $('download').hidden=true; note('正在生成校样…');
+  $('download').hidden=true; $('download-outline').hidden=true; frozenId=null;
+  note('正在生成校样…');
   const {summary,base64}=await post('/api/preview',document);
   await display(document,summary,decode(base64,metadata.asset));
   note('校样已更新');
@@ -67,8 +74,8 @@ async function loadDemo() {
 async function listVersions() {
   await refreshVersions($('versions'),id=>task(async()=>{
     const [record,blob]=await Promise.all([get(`/api/library/${id}`),artifact(id)]);
-    await display(record.document,record.summary,blob);
-    showDownload(id); note(`冻结版本 ${id.slice(0,12)}`);
+    await display(record.document,record.summary,blob,id);
+    showDownloads(id); note(`冻结版本 ${id.slice(0,12)}`);
   }));
 }
 
@@ -78,8 +85,8 @@ $('freeze').onclick=()=>task(async()=>{
   note('正在冻结…');
   const saved=await post('/api/library',parseDocument(editor.value));
   const [record,blob]=await Promise.all([get(`/api/library/${saved.id}`),artifact(saved.id)]);
-  await display(record.document,saved.summary,blob);
-  showDownload(saved.id); await listVersions(); note(`${saved.created?'已冻结':'已复用'} ${saved.id.slice(0,12)}`);
+  await display(record.document,saved.summary,blob,saved.id);
+  showDownloads(saved.id); await listVersions(); note(`${saved.created?'已冻结':'已复用'} ${saved.id.slice(0,12)}`);
 });
 $('import').onclick=()=>$('file').click();
 $('file').onchange=()=>task(async()=>{

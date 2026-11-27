@@ -19,6 +19,15 @@ npm start
 可以导入 JSON，或者在「源文档」区域编辑。获取可导入样例：`curl -s http://127.0.0.1:8742/api/demo | node -e 'process.stdin.on("data",c=>s+=c).on("end",()=>console.log(JSON.stringify(JSON.parse(s).document,null,2)));let s=""'`。
 更新校样只计算不落盘；冻结会写入版本库，下载原始 `.png` 资产。可在「冻结版本」中复取已保存版本。
 
+## 单色轮廓素材
+
+同一冻结件可额外导出单色轮廓素材（`.outline.png`）：8 位灰度 PNG，每个像素编码一个半像素方格中心到轮廓边界的带符号欧氏距离（内部为正、外部为负，设计像素单位，截到 ±4），参数放在 `tEXt` 块中，单文件即可离线使用。
+
+网页端的「单色轮廓素材」面板只依赖该素材，可直接控制填色、描边色、描边宽度（0–3 输出像素）和 1–4 倍展示倍率；整个带留边画面等比缩放，输出宽高向上取整，边缘带平滑过渡。接口：
+
+- `POST /api/outline`：按当前规范文档返回素材（base64 + 参数），不落盘。
+- `GET /api/library/:id/outline`：从同一冻结件下载素材，与彩色 PNG 同源。
+
 ## 检查
 
 `npm run check` 检查所有 JavaScript 模块语法，`npm run demo` 通过本机 HTTP 服务演练核心产物。完整测试套件暂缓；[项目规格](PROJECT_SPEC.md)列出全部生产工作流检查和输入边界。

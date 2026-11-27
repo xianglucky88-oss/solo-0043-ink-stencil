@@ -19,6 +19,10 @@ export async function artifact(id) {
   return (await checked(`/api/library/${id}/asset`)).blob();
 }
 
+export async function outlineArtifact(id) {
+  return (await checked(`/api/library/${id}/outline`)).blob();
+}
+
 export function decode(base64,type) {
   return new Blob([Uint8Array.from(atob(base64),c=>c.charCodeAt(0))],{type});
 }

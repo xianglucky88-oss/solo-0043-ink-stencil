@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node server/boot.mjs",
     "check": "node tools/check.mjs",
-    "demo": "node tools/workflow.mjs"
+    "demo": "node tools/workflow.mjs",
+    "test:outline": "node tools/outline-tests/outline-core.test.mjs && node tools/outline-tests/renderer.test.mjs && node tools/outline-tests/acceptance.test.mjs"
   }
 }

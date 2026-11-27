@@ -33,6 +33,42 @@ try {
       const bad=await get('/api/preview',{method:'POST',headers:{'Content-Type':'application/json'},body:'{' });
       await read(bad,400); await rejected({});
     },
+    outline:async()=>{
+      const inflate=(await import('node:zlib')).inflateSync;
+      // 预览接口直接返回轮廓素材（base64 灰度 PNG + 参数块）。
+      const result=await read(await send('/api/outline',document));
+      assert.ok(result.meta.gridWidth>0 && result.meta.paddingPixels===4);
+      const bytes=Buffer.from(result.base64,'base64');
+      assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+      assert.match(bytes.toString('latin1'),/ink-outline/);
+      // 冻结后同一版本可分别下载彩色 PNG 与轮廓素材。
+      const {id}=await save();
+      const colorPng=await asset(id);
+      const outlineResp=await get(`/api/library/${id}/outline`);
+      assert.equal(outlineResp.status,200);
+      assert.equal(outlineResp.headers.get('content-type'),'image/png');
+      const outlineBytes=Buffer.from(await outlineResp.arrayBuffer());
+      assert.deepEqual(outlineBytes,bytes);
+      assert.match(outlineResp.headers.get('content-disposition')??'',/outline\.png/);
+      // 按块解析：IHDR 为 8 位灰度（色彩类型 0），IDAT 解出的行数与网格一致。
+      let offset=8, ihdr=null, idat=[];
+      while(offset<outlineBytes.length) {
+        const len=outlineBytes.readUInt32BE(offset), type=outlineBytes.toString('ascii',offset+4,offset+8);
+        if(type==='IHDR') ihdr=outlineBytes.subarray(offset+8,offset+8+len);
+        if(type==='IDAT') idat.push(outlineBytes.subarray(offset+8,offset+8+len));
+        offset+=12+len;
+        if(type==='IEND') break;
+      }
+      assert.equal(ihdr[9],0);
+      const gridW=ihdr.readUInt32BE(0), gridH=ihdr.readUInt32BE(4);
+      assert.equal(gridW,result.meta.gridWidth);
+      const raw=inflate(Buffer.concat(idat));
+      assert.equal(raw.length,(gridW+1)*gridH);
+      // 与彩色 PNG 是两份不同资产。
+      assert.notDeepEqual(colorPng,outlineBytes);
+      // 未知版本 404。
+      await read(await get(`/api/library/${'a'.repeat(64)}/outline`),404);
+    },
     freeze:async()=>{
       const [a,b]=await Promise.all([send('/api/library',document),send('/api/library',document)]);
       assert.deepEqual([a.status,b.status].sort(),[200,201]);

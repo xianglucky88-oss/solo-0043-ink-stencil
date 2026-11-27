@@ -79,6 +79,42 @@
       ]
     },
     {
+      "id": "product-outline",
+      "path": "product/outline.mjs",
+      "role": [
+        "单色轮廓素材"
+      ]
+    },
+    {
+      "id": "product-outline-png",
+      "path": "product/outline-png.mjs",
+      "role": [
+        "单色轮廓素材"
+      ]
+    },
+    {
+      "id": "product-png-codec",
+      "path": "product/png-codec.mjs",
+      "role": [
+        "单色轮廓素材",
+        "逐像素合成"
+      ]
+    },
+    {
+      "id": "web-sdf-render",
+      "path": "web/sdf-render.mjs",
+      "role": [
+        "单色轮廓素材"
+      ]
+    },
+    {
+      "id": "web-outline-view",
+      "path": "web/outline-view.mjs",
+      "role": [
+        "单色轮廓素材"
+      ]
+    },
+    {
       "id": "server-router",
       "path": "server/router.mjs",
       "role": [

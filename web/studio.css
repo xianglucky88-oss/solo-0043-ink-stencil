@@ -6,3 +6,13 @@
 .layer-list li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:41px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
 .layer-list li:last-child{border-bottom:0}.layer-list small{display:block;color:var(--muted)}.layer-list span{font-size:10px}
 .swatch{width:18px;height:18px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px #ffffff40}
+.outline-panel{border-top:1px solid var(--line);padding:13px 15px}
+.outline-panel h4{margin-bottom:10px}
+.outline-mat{height:clamp(160px,32vw,340px);margin-bottom:10px}
+.outline-raster{cursor:default}
+.outline-controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:10px}
+.field-inline{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px}
+.field-inline input[type=color]{width:38px;height:28px;padding:2px;background:none;border:1px solid #51595d;border-radius:5px}
+.field-inline select,.field-inline input[type=number]{min-height:28px;padding:2px 6px;max-width:84px}
+.outline-download{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.panel-head a+a{margin-left:4px}

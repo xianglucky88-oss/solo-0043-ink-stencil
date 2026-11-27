@@ -23,6 +23,7 @@
 | 透明度与混色 | `POST /api/preview 的 blend` | 正常、乘色和滤色按图层顺序合成 | 未知色值或混合模式拒绝 | `node tools/workflow.mjs blend` |
 | 边缘子像素 | `POST /api/preview 的 samples` | 网格子样点先合成后求平均，输出保留边缘透明度 | 超过预算拒绝 | `node tools/workflow.mjs sampling` |
 | 导入文档 | `POST /api/preview` | 规范输入进入校样计算 | 非法 UTF-8、JSON 或字段直接拒绝；不覆盖已有冻结资产 | `node tools/workflow.mjs import` |
+| 单色轮廓素材 | `POST /api/outline`、`GET /api/library/:id/outline` | 半像素方格轮廓与带符号距离灰度 PNG，网页离线控制填色、倍率与描边 | 空轮廓全部编码为负四；非法文档沿用导入拒绝 | `node tools/workflow.mjs outline` |
 | 冻结校样 | `POST /api/library` | 相同规范输入与产物复用同一摘要；并行提交只创建一次 | 无法规范化的草稿不会签发 | `node tools/workflow.mjs freeze` |
 | 下载版本产物 | `GET /api/library/:id/asset` | 返回冻结资产原始字节、正确媒体类型和文件名 | 不存在的资产返回 404 | `node tools/workflow.mjs download` |
 | 重启后复取 | `GET /api/library 与 GET /api/library/:id` | 恢复已有规范文档及成品校样摘要 | 未知或无法读取的版本不会替换当前校样 | `node tools/workflow.mjs reopen` |
@@ -35,13 +36,16 @@
 | `product/document.mjs` | 逐像素合成、局部轮廓变换、几何遮罩链、透明度与混色、边缘子像素、导入文档 |
 | `product/raster.mjs` | 逐像素合成、局部轮廓变换、几何遮罩链、透明度与混色、边缘子像素 |
 | `product/png.mjs` | 逐像素合成、边缘子像素 |
+| `product/png-codec.mjs` | 单色轮廓素材、逐像素合成 |
+| `product/outline.mjs` | 单色轮廓素材 |
+| `product/outline-png.mjs` | 单色轮廓素材 |
 | `product/index.mjs` | 逐像素合成、导入文档、冻结校样 |
 | `product/transform.mjs` | 局部轮廓变换 |
 | `product/shapes.mjs` | 局部轮廓变换、几何遮罩链 |
 | `product/masks.mjs` | 几何遮罩链、边缘子像素 |
 | `product/color.mjs` | 透明度与混色 |
 | `product/blend.mjs` | 透明度与混色 |
-| `server/router.mjs` | 导入文档、冻结校样、下载版本产物、重启后复取、完整性复核 |
+| `server/router.mjs` | 导入文档、冻结校样、下载版本产物、重启后复取、完整性复核、单色轮廓素材 |
 | `server/request-body.mjs` | 导入文档 |
 | `server/library.mjs` | 冻结校样、下载版本产物、重启后复取、完整性复核 |
 | `server/canonical.mjs` | 冻结校样、下载版本产物、重启后复取、完整性复核 |

@@ -34,6 +34,10 @@
       "command": "node tools/workflow.mjs import"
     },
     {
+      "workflow_id": "outline",
+      "command": "node tools/workflow.mjs outline"
+    },
+    {
       "workflow_id": "freeze",
       "command": "node tools/workflow.mjs freeze"
     },
